@@ -1,0 +1,20 @@
+{% if status is not empty %}
+    <div class="data-quality">
+        {% for area in status %}
+            <div class="data-quality_area">
+                <h2 class="data-quality_headline">
+                    {{ area.name }}
+                </h2>
+                <table class="data-quality_table">
+                    {% for field in area.fields %}
+                        <tr class="data-quality_row">
+                            <td class="data-quality_column{{ field.isEmpty ? ' data-quality_column--empty' : '' }}">
+                                {{ field.name }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

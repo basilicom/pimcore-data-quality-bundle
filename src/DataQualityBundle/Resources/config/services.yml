@@ -1,0 +1,30 @@
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        # automatically injects dependencies in your services
+        autowire: true
+        # automatically registers your services as commands, event subscribers, etc.
+        autoconfigure: true
+        # this means you cannot fetch services directly from the container via $container->get()
+        # if you need to do this, you can override this setting on individual services
+        public: false
+
+    Basilicom\DataQualityBundle\Tools\Installer:
+      public: true
+      arguments:
+        # fetch the bundle via expression language
+        $bundle: "@=service('kernel').getBundle('DataQualityBundle')"
+
+    Basilicom\DataQualityBundle\Service\DataQualityService:
+      public: true
+
+    Basilicom\DataQualityBundle\Provider\DataQualityProvider:
+      public: true
+
+    object_type.options_provider:
+      class: \Basilicom\DataQualityBundle\Model\Provider\ObjectTypeProvider
+      public: true
+
+    object_fields.options_provider:
+      class: \Basilicom\DataQualityBundle\Model\Provider\ObjectFieldsProvider
+      public: true

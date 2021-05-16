@@ -1,0 +1,43 @@
+{
+  "name": "basilicom/pimcore-data-quality-bundle",
+  "license": "GPL-3.0-or-later",
+  "type": "pimcore-bundle",
+  "description": "",
+  "keywords": [
+    "pimcore",
+    "data quality",
+    "dataquality"
+  ],
+  "homepage": "https://basilicom.de",
+  "authors": [
+    {
+      "name": "Conrad Guelzow",
+      "email": "conrad.guelzow@basilicom.de"
+    },
+    {
+      "name": "Basilicom GmbH",
+      "homepage": "https://basilicom.de"
+    }
+  ],
+  "config": {
+    "optimize-autoloader": true,
+    "apcu-autoloader": true,
+    "sort-packages": true
+  },
+  "require": {
+    "php": ">=7.3",
+    "pimcore/pimcore": ">=6.0 <7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Basilicom\\DataQualityBundle\\": "src/"
+    }
+  },
+  "extra": {
+    "pimcore": {
+      "bundles": [
+        "Basilicom\\DataQualityBundle\\DataQualityBundle"
+      ]
+    }
+  }
+}
