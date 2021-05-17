@@ -2,7 +2,7 @@
   "name": "basilicom/pimcore-data-quality-bundle",
   "license": "GPL-3.0-or-later",
   "type": "pimcore-bundle",
-  "description": "",
+  "description": "Data Quality Bundle for Pimcore",
   "keywords": [
     "pimcore",
     "data quality",
@@ -19,11 +19,6 @@
       "homepage": "https://basilicom.de"
     }
   ],
-  "config": {
-    "optimize-autoloader": true,
-    "apcu-autoloader": true,
-    "sort-packages": true
-  },
   "require": {
     "php": ">=7.3",
     "pimcore/pimcore": ">=6.0 <7.0"
