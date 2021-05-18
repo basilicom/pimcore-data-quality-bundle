@@ -25,7 +25,7 @@ final class DataQualityProvider
 
             $objectData[] = [
                 'name' => $fieldNameSplit[1] ?: $fieldNameSplit[0],
-                'isEmpty' => \empty($value)
+                'isEmpty' => empty($value)
             ];
         }
 
