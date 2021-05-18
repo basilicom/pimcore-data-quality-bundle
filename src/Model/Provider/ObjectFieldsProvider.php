@@ -44,14 +44,14 @@ class ObjectFieldsProvider implements SelectOptionsProviderInterface
                 foreach ($children as $child) {
                     $result[] = [
                         'key' => $child->getTitle() ?: $child->getName(),
-                        'value' => $child->getName(),
+                        'value' => $child->getName() . '@@@' . $child->getTitle(),
                     ];
                 }
 
             } else {
                 $result[] = [
                     'key' => $field->getTitle() ?: $name,
-                    'value' => $name,
+                    'value' => $name . '@@@' . $field->getTitle(),
                 ];
             }
         }

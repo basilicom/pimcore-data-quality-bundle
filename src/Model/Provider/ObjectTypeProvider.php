@@ -22,7 +22,7 @@ class ObjectTypeProvider implements SelectOptionsProviderInterface
         foreach ($classDefinitionList as $item) {
             $result[] = [
                 'key' => $item->getName() . ' (' . $item->getId() . ')',
-                'value' => $item->getId() . '@@@' . $item->getName(),
+                'value' => $item->getId()
             ];
         }
 
