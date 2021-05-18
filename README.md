@@ -6,7 +6,7 @@ With this bundle the data quality of objects can be checked and displayed.
 
 ## Installation
 1. Install the bundle using ``composer require basilicom/pimcore-data-quality-bundle``
-2. Execute ``bin/console pimcore:bundle:enable DataQualityBundle``
+2. Execute ``bin/console pimcore:bundle:install DataQualityBundle``
 
 ## Configuration
 1. Add a new object ``Data Quality Config`` in your object tree

@@ -88,13 +88,13 @@ class Installer extends MigrationInstaller
     private function getClassesToInstall(): array
     {
         $result = [];
-        foreach (array_keys($this->classesToInstall) as $className) {
-            $filename = sprintf('class_%s_export.json', $className);
+        foreach (\array_keys($this->classesToInstall) as $className) {
+            $filename = \sprintf('class_%s_export.json', $className);
             $path = $this->installSourcesPath . '/class_sources/' . $filename;
-            $path = realpath($path);
+            $path = \realpath($path);
 
-            if (false === $path || !is_file($path)) {
-                throw new AbortMigrationException(sprintf(
+            if (false === $path || !\is_file($path)) {
+                throw new AbortMigrationException(\sprintf(
                     'Class export for class "%s" was expected in "%s" but file does not exist',
                     $className,
                     $path
@@ -116,7 +116,7 @@ class Installer extends MigrationInstaller
             $class = ClassDefinition::getByName($key);
 
             if ($class) {
-                $this->outputWriter->write(sprintf(
+                $this->outputWriter->write(\sprintf(
                     '     <comment>WARNING:</comment> Skipping class "%s" as it already exists',
                     $key
                 ));
@@ -130,11 +130,11 @@ class Installer extends MigrationInstaller
             $class->setName($key);
             $class->setId($classId);
 
-            $data = file_get_contents($path);
+            $data = \file_get_contents($path);
             $success = Service::importClassDefinitionFromJson($class, $data, false, true);
 
             if (!$success) {
-                throw new AbortMigrationException(sprintf(
+                throw new AbortMigrationException(\sprintf(
                     'Failed to create class "%s"',
                     $key
                 ));
@@ -155,7 +155,7 @@ class Installer extends MigrationInstaller
                 continue;
             }
 
-            $this->outputWriter->write(sprintf(
+            $this->outputWriter->write(\sprintf(
                 '     <comment>WARNING:</comment> Skipping class "%s" as it doesn\'t exists',
                 $key
             ));
@@ -171,7 +171,7 @@ class Installer extends MigrationInstaller
 
         foreach ($bricks as $key => $path) {
             if ($brick = Objectbrick\Definition::getByKey($key)) {
-                $this->outputWriter->write(sprintf(
+                $this->outputWriter->write(\sprintf(
                     '     <comment>WARNING:</comment> Skipping object brick "%s" as it already exists',
                     $key
                 ));
@@ -182,11 +182,11 @@ class Installer extends MigrationInstaller
             $brick = new Objectbrick\Definition();
             $brick->setKey($key);
 
-            $data = file_get_contents($path);
+            $data = \file_get_contents($path);
             $success = Service::importObjectBrickFromJson($brick, $data);
 
             if (!$success) {
-                throw new AbortMigrationException(sprintf(
+                throw new AbortMigrationException(\sprintf(
                     'Failed to create object brick "%s"',
                     $key
                 ));
@@ -228,7 +228,7 @@ class Installer extends MigrationInstaller
 
         $results = [];
         foreach ($finder as $file) {
-            if (preg_match($pattern, $file->getFilename(), $matches)) {
+            if (\preg_match($pattern, $file->getFilename(), $matches)) {
                 $key = $matches[1];
                 $results[$key] = $file->getRealPath();
             }

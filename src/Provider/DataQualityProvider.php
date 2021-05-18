@@ -13,18 +13,19 @@ final class DataQualityProvider
 
         foreach ($dataFields as $fieldName) {
             $value = null;
-            $getter = 'get' . ucfirst($fieldName);
+            $fieldNameSplit = \explode('@@@', $fieldName);
+            $getter = 'get' . \ucfirst($fieldNameSplit[0]);
 
             if (\method_exists(
                 '\\Pimcore\\Model\\DataObject\\' . $dataObject->getClassName(),
-                'get' . ucfirst($fieldName)
+                $getter
             )) {
                 $value = $dataObject->$getter();
             }
 
             $objectData[] = [
-                'name' => $fieldName,
-                'isEmpty' => empty($value)
+                'name' => $fieldNameSplit[1] ?: $fieldNameSplit[0],
+                'isEmpty' => \empty($value)
             ];
         }
 
