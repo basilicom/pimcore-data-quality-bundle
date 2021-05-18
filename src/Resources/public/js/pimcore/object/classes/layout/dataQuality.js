@@ -10,7 +10,7 @@ pimcore.object.classes.layout.dataQuality = Class.create(pimcore.object.classes.
     },
 
     getTypeName: function () {
-        return t("dataQuality");
+        return t("Data Quality");
     },
 
     getIconClass: function () {

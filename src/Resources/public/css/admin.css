@@ -18,13 +18,14 @@
 }
 
 .data-quality_column {
+  font-size: 14px;
   border: 1px solid #000;
-  padding: 8px 5px;
-  background-color: #C0FFB3;
+  padding: 10px 10px 10px 35px;
+  background: #C0FFB3 url(/bundles/pimcoreadmin/img/flat-color-icons/approve.svg) 5px center no-repeat;
 }
 
 .data-quality_column.data-quality_column--empty {
-  background-color: #FFB8B8;
+  background: #FFB8B8 url(/bundles/pimcoreadmin/img/flat-color-icons/disapprove.svg) 5px center no-repeat;
 }
 
 .pimcore_icon_charty {
