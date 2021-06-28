@@ -21,6 +21,10 @@ services:
     Basilicom\DataQualityBundle\Provider\DataQualityProvider:
       public: true
 
+    Basilicom\DataQualityBundle\Model\Listener\ObjectPostUpdateListener:
+      tags:
+        - { name: kernel.event_listener, event: pimcore.dataobject.postUpdate, method: onPostUpdate }
+
     object_type.options_provider:
       class: \Basilicom\DataQualityBundle\Model\Provider\ObjectTypeProvider
       public: true

@@ -1,6 +1,7 @@
-{% if status is not empty %}
+{% if data is not empty %}
     <div class="data-quality">
-        {% for area in status %}
+        <h1>{{ data.percent }}%</h1>
+        {% for area in data.items %}
             <div class="data-quality_area">
                 <h2 class="data-quality_headline">
                     {{ area.name | trans }}
