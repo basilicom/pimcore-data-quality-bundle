@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="{{ asset('bundles/dataquality/css/admin.css') }}" rel="stylesheet" />
+</head>
+<body>
+<div class="{% if standalone is defined %}data-quality{% endif %}">
+    {% block body %}{% endblock %}
+</div>
+</body>
+</html>

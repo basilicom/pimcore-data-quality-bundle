@@ -6,21 +6,36 @@ namespace Basilicom\DataQualityBundle\Provider;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\AbstractObject;
 use Pimcore\Model\DataObject\DataQualityConfig;
+use Pimcore\Version;
 
 final class DataQualityProvider
 {
-    private const DATA_QUALITY_PERCENT = 'DataQualityPercent';
+    public const DATA_QUALITY_PERCENT = 'DataQualityPercent';
 
-    public function setDataQualityPercent(AbstractObject $dataObject, array $data): int
+    public function setDataQualityPercent(AbstractObject $dataObject, array $items): int
     {
         $value = 0;
+        $countTotal = 0;
+        $countComplete = 0;
         $setter = 'set' . \ucfirst(self::DATA_QUALITY_PERCENT);
 
         if (\method_exists(
             '\\Pimcore\\Model\\DataObject\\' . $dataObject->getClassName(),
             $setter
         )) {
-            $dataObject->$setter();
+            \Pimcore\Model\Version::disable();
+
+            foreach ($items as $area) {
+                foreach ($area['fields'] as $field) {
+                    $countTotal++;
+                    if ($field['isEmpty'] === false) {
+                        $countComplete++;
+                    }
+                }
+            }
+
+            $value = (int) \round(($countComplete / $countTotal) * 100);
+            $dataObject->$setter($value);
             $dataObject->save();
         }
 
@@ -42,7 +57,7 @@ final class DataQualityProvider
         return $value;
     }
 
-    public function getDataQualityConfig(AbstractObject $dataObject): ?DataQualityConfig
+    public function getDataQualityConfig(?AbstractObject $dataObject): ?DataQualityConfig
     {
         $dataQualityConfigList = new DataQualityConfig\Listing();
 
@@ -92,7 +107,7 @@ final class DataQualityProvider
         $data = ['items' => []];
 
         foreach ($dataQualityRule->getItems() as $dataQualityRuleItem) {
-            if ($dataQualityRuleItem instanceof ObjectCompletion) {
+            if ($dataQualityRuleItem instanceof DataObject\Objectbrick\Data\ObjectCompletion) {
                 foreach ($dataQualityRuleItem->getArea() as $area) {
                     $data['items'][] = [
                         'name' => $area['AreaName']->getData(),
@@ -102,7 +117,7 @@ final class DataQualityProvider
             }
         }
 
-        $data['percent'] = 0;
+        $data['percent'] = $this->setDataQualityPercent($dataObject, $data['items']);
 
         return $data;
     }

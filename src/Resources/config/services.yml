@@ -9,6 +9,11 @@ services:
         # if you need to do this, you can override this setting on individual services
         public: false
 
+    Basilicom\DataQualityBundle\Controller\:
+      resource: '../../Controller'
+      public: true
+      tags: ['controller.service_arguments']
+
     Basilicom\DataQualityBundle\Tools\Installer:
       public: true
       arguments:

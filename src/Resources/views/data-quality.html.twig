@@ -1,21 +1,32 @@
-{% if data is not empty %}
-    <div class="data-quality">
-        <h1>{{ data.percent }}%</h1>
-        {% for area in data.items %}
-            <div class="data-quality_area">
-                <h2 class="data-quality_headline">
-                    {{ area.name | trans }}
-                </h2>
-                <table class="data-quality_table">
-                    {% for field in area.fields %}
-                        <tr class="data-quality_row">
-                            <td class="data-quality_column{{ field.isEmpty ? ' data-quality_column--empty' : '' }}">
-                                {{ field.name | trans }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
+{% extends '@DataQualityBundle/Resources/views/layout.html.twig' %}
+
+{% trans_default_domain 'admin' %}
+
+{% block body %}
+    {% if data is not empty %}
+        <div class="data-quality_container">
+            {% if data.percent > 0 %}
+              <h1>
+                  {{ 'dataQuality.label.total' | trans }}
+                  <span class="data-quality_percent{% if data.percent == 100 %} data-quality_percent--complete{% endif %}">{{ data.percent }}%</span>
+              </h1>
+            {% endif %}
+            {% for area in data.items %}
+                <div class="data-quality_area">
+                    <h2 class="data-quality_headline">
+                        {{ area.name | trans }}
+                    </h2>
+                    <table class="data-quality_table">
+                        {% for field in area.fields %}
+                            <tr class="data-quality_row">
+                                <td class="data-quality_column{{ field.isEmpty ? ' data-quality_column--empty' : '' }}">
+                                    {{ field.name | trans }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

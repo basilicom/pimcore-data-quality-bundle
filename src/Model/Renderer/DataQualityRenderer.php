@@ -4,6 +4,8 @@ namespace Basilicom\DataQualityBundle\Model\Renderer;
 
 use Basilicom\DataQualityBundle\Exception\DataQualityException;
 use Basilicom\DataQualityBundle\Service\DataQualityService;
+use Pimcore\Log\ApplicationLogger;
+use Pimcore\Logger;
 use Pimcore\Model\DataObject\AbstractObject;
 use Symfony\Component\Translation\TranslatorInterface;
 use Twig\Environment;
@@ -29,13 +31,13 @@ class DataQualityRenderer
             $dataQualityConfig = $dataQualityService->getDataQualityConfig($dataObject);
 
             if ($dataQualityConfig === null) {
-                return $translator->trans('dataQuality.error.missing_config');
+                return $translator->trans('dataQuality.error.missing_config', [],'admin');
             }
 
             $dataQualityRule = $dataQualityService->getDataQualityRule($dataQualityConfig);
 
             if ($dataQualityRule === null) {
-                return $translator->trans('dataQuality.error.missing_rule');
+                return $translator->trans('dataQuality.error.missing_rule', [],'admin');
             }
 
             $html = $twig->render('@DataQualityBundle/Resources/views/data-quality.html.twig', [

@@ -17,6 +17,29 @@ pimcore.plugin.DataQualityBundle = Class.create(pimcore.plugin.admin, {
     }
 
     return allowedTypes;
+  },
+
+  postSaveObject: function (object) {
+    if (object.data.data.DataQualityPercent) {
+      object.tabbar.remove(object.tabbar.items.length - 1);
+      this.postOpenObject(object);
+    }
+  },
+
+  postOpenObject: function (object, type) {
+    if (object.data.data.DataQualityPercent) {
+      var path = '/data-quality/index/' + object.id;
+      var tab = Ext.create('Ext.panel.Panel', {
+        border: false,
+        autoScroll: true,
+        closable: false,
+        iconCls: 'pimcore_icon_charty',
+        bodyCls: 'pimcore_overflow_scrolling',
+        html: '<iframe src="' + path + '" style="width: 100%; height: 100%;" frameborder="0"></iframe>',
+      });
+      object.tabbar.add([tab]);
+      pimcore.layout.refresh();
+    }
   }
 });
 

@@ -17,7 +17,17 @@ class DataQualityService
         $this->dataQualityProvider = $dataQualityProvider;
     }
 
-    public function getDataQualityConfig(AbstractObject $dataObject): ?DataQualityConfig
+    public function setDataQualityPercent(AbstractObject $dataObject, array $items): int
+    {
+        return $this->dataQualityProvider->setDataQualityPercent($dataObject, $items);
+    }
+
+    public function getDataQualityPercent(AbstractObject $dataObject): int
+    {
+        return $this->dataQualityProvider->getDataQualityPercent($dataObject);
+    }
+
+    public function getDataQualityConfig(?AbstractObject $dataObject): ?DataQualityConfig
     {
         return $this->dataQualityProvider->getDataQualityConfig($dataObject);
     }

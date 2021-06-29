@@ -1,0 +1,3 @@
+dataQuality:
+    resource: "@DataQualityBundle/Controller"
+    type:     annotation
