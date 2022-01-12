@@ -5,23 +5,33 @@ namespace Basilicom\DataQualityBundle\Model\Provider;
 
 use Pimcore\Model\DataObject\ClassDefinition;
 use Pimcore\Model\DataObject\ClassDefinition\DynamicOptionsProvider\SelectOptionsProviderInterface;
+use Pimcore\Model\DataObject\DataQualityConfig;
 
-class ObjectTypeProvider implements SelectOptionsProviderInterface
+class ObjectClassesProvider implements SelectOptionsProviderInterface
 {
     /**
      * @param array $context
      * @param ClassDefinition\Data $fieldDefinition
+     *
      * @return array
      */
-    public function getOptions($context, $fieldDefinition)
+    public function getOptions($context, $fieldDefinition): array
     {
-        $result = [];
+        $object = $context['object'];
+        if (empty($object) || !($object instanceof DataQualityConfig)) {
+            return [];
+        }
+
+        $result              = [];
         $classDefinitionList = (new ClassDefinition\Listing())->getClasses();
 
-        /** @var $item ClassDefinition */
         foreach ($classDefinitionList as $item) {
+            if ($item->getId() === $object->getClassId()) {
+                continue;
+            }
+
             $result[] = [
-                'key' => $item->getName() . ' (' . $item->getId() . ')',
+                'key'   => $item->getName() . ' (' . $item->getId() . ')',
                 'value' => $item->getId()
             ];
         }
@@ -32,9 +42,10 @@ class ObjectTypeProvider implements SelectOptionsProviderInterface
     /**
      * @param array $context
      * @param ClassDefinition\Data $fieldDefinition
-     * @return mixed
+     *
+     * @return string|null
      */
-    public function getDefaultValue($context, $fieldDefinition)
+    public function getDefaultValue($context, $fieldDefinition): ?string
     {
         return $fieldDefinition->getDefaultValue();
     }
@@ -42,9 +53,10 @@ class ObjectTypeProvider implements SelectOptionsProviderInterface
     /**
      * @param array $context
      * @param ClassDefinition\Data $fieldDefinition
+     *
      * @return bool
      */
-    public function hasStaticOptions($context, $fieldDefinition)
+    public function hasStaticOptions($context, $fieldDefinition): bool
     {
         return false;
     }

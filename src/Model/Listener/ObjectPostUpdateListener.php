@@ -2,19 +2,17 @@
 
 namespace Basilicom\DataQualityBundle\Model\Listener;
 
-use Basilicom\DataQualityBundle\Provider\DataQualityProvider;
 use Basilicom\DataQualityBundle\Service\DataQualityService;
+use Exception;
 use Pimcore\Event\Model\DataObjectEvent;
 use Pimcore\Event\Model\ElementEventInterface;
-use Pimcore\Model\DataObject;
+use Pimcore\Model\DataObject\AbstractObject;
 use Pimcore\Model\DataObject\ClassDefinition;
 use Pimcore\Model\DataObject\DataQualityConfig;
-use Pimcore\Model\Listing\AbstractListing;
 
 class ObjectPostUpdateListener
 {
-    /** @var DataQualityService */
-    private $dataQualityService;
+    private DataQualityService $dataQualityService;
 
     public function __construct(
         DataQualityService $dataQualityService
@@ -22,59 +20,55 @@ class ObjectPostUpdateListener
         $this->dataQualityService = $dataQualityService;
     }
 
-    /**
-     * @param ElementEventInterface $element
-     */
-    public function onPostUpdate(ElementEventInterface $element)
+    public function onPostUpdate(ElementEventInterface $event)
     {
-        if (!$element instanceof DataObjectEvent) {
+        $arguments = $event->getArguments();
+        if (isset($arguments['isAutoSave']) && $arguments['isAutoSave']) {
             return;
         }
 
-        $object = $element->getElement();
-
-        if ($object instanceof DataObject\DataQualityConfig) {
-            try {
-                $dataQualityTypeId = $object->getDataQualityType();
-
-                if ($dataQualityTypeId === null) {
-                    return;
-                }
-
-                $classType = ClassDefinition::getById($dataQualityTypeId);
-
-                if ($classType === null) {
-                    return;
-                }
-
-                $dataQualityRule = $this->dataQualityService->getDataQualityRule($object);
-
-                if ($dataQualityRule === null) {
-                    return;
-                }
-
-                $className = $classType->getName();
-                $class = '\\Pimcore\\Model\\DataObject\\' . $classType->getName() . '\\Listing';
-                $list = new $class();
-                $list->setObjectTypes([DataObject::OBJECT_TYPE_OBJECT, DataObject::OBJECT_TYPE_VARIANT]);
-                $list->setUnpublished(true);
-                $list->load();
-
-                $getter = 'get' . \ucfirst(DataQualityProvider::DATA_QUALITY_PERCENT);
-
-                foreach ($list as $item) {
-                    if (\method_exists(
-                        '\\Pimcore\\Model\\DataObject\\' . $className,
-                        $getter
-                    )) {
-                        $this->dataQualityService->getDataQualityData($item, $dataQualityRule);
-                    }
-                }
-
-            } catch (\Exception $exception) {
-            }
-
+        if (!$event instanceof DataObjectEvent) {
             return;
+        }
+
+        $object = $event->getElement();
+        if ($object instanceof DataQualityConfig) {
+            try {
+                $this->updateAllDataObject($object);
+            } catch (Exception $exception) {
+                // do nothing
+            }
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function updateAllDataObject(DataQualityConfig $dataQualityConfig): void
+    {
+        $classId   = $dataQualityConfig->getDataQualityClass();
+        $fieldname = $dataQualityConfig->getDataQualityField();
+        if (empty($classId) || empty($fieldname)) {
+            return;
+        }
+
+        $class = ClassDefinition::getById($classId);
+        if (empty($class)) {
+            return;
+        }
+
+        $classListing = '\\Pimcore\\Model\\DataObject\\' . $class->getName() . '\\Listing';
+        $list         = new $classListing();
+        $list->setObjectTypes([AbstractObject::OBJECT_TYPE_OBJECT, AbstractObject::OBJECT_TYPE_VARIANT]);
+        $list->setUnpublished(true);
+        $list->load();
+
+        if ($list->getCount() <= 0) {
+            return;
+        }
+
+        foreach ($list as $item) {
+            $this->dataQualityService->calculateDataQuality($item, $dataQualityConfig);
         }
     }
 }

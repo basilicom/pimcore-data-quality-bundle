@@ -3,14 +3,30 @@
 namespace Basilicom\DataQualityBundle\Model\DataObject\ClassDefinition\Layout;
 
 use Pimcore\Model;
+use Pimcore\Model\DataObject\ClassDefinition\Data\LayoutDefinitionEnrichmentInterface;
+use Pimcore\Model\DataObject\ClassDefinition\Layout;
 
-class DataQuality extends Model\DataObject\ClassDefinition\Layout
+class DataQuality extends Layout implements LayoutDefinitionEnrichmentInterface
 {
-    /** @var string */
-    public $fieldtype = 'dataQuality';
+    public string $fieldtype = 'dataQuality';
+    public string $html      = '';
+    public int $dataQualityConfigId;
 
-    /** @var string */
-    public $html = '';
+    /**
+     * @return int
+     */
+    public function getDataQualityConfigId(): int
+    {
+        return $this->dataQualityConfigId;
+    }
+
+    /**
+     * @param int $dataQualityConfigId
+     */
+    public function setDataQualityConfigId(int $dataQualityConfigId): void
+    {
+        $this->dataQualityConfigId = $dataQualityConfigId;
+    }
 
     /**
      * @param Model\DataObject\Concrete $object
@@ -20,19 +36,6 @@ class DataQuality extends Model\DataObject\ClassDefinition\Layout
      */
     public function enrichLayoutDefinition($object, $context = [])
     {
-        $renderer = Model\DataObject\ClassDefinition\Helper\DynamicTextResolver::resolveRenderingClass(
-            'Basilicom\\DataQualityBundle\\Model\\Renderer\\DataQualityRenderer'
-        );
-
-        if (method_exists($renderer, 'renderLayoutText')) {
-            $context['fieldname'] = $this->getName();
-            $context['layout'] = $this;
-            $result = call_user_func([$renderer, 'renderLayoutText'], $object, $context);
-            $this->html = $result;
-        } else {
-            $this->html = '';
-        }
-
         return $this;
     }
 }

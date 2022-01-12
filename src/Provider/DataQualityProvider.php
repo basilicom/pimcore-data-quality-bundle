@@ -3,122 +3,120 @@ declare(strict_types=1);
 
 namespace Basilicom\DataQualityBundle\Provider;
 
-use Pimcore\Model\DataObject;
+use Basilicom\DataQualityBundle\DefinitionsCollection\Factory\FieldDefinitionFactory;
+use Basilicom\DataQualityBundle\DefinitionsCollection\FieldDefinition;
 use Pimcore\Model\DataObject\AbstractObject;
 use Pimcore\Model\DataObject\DataQualityConfig;
-use Pimcore\Version;
+use Pimcore\Model\DataObject\Fieldcollection\Data\DataQualityFieldDefinition;
+use Pimcore\Model\Version as DataObjectVersion;
 
 final class DataQualityProvider
 {
-    public const DATA_QUALITY_PERCENT = 'DataQualityPercent';
+    private FieldDefinitionFactory $fieldDefinitionFactory;
 
-    public function setDataQualityPercent(AbstractObject $dataObject, array $items): int
+    public function __construct(FieldDefinitionFactory $fieldDefinitionFactory)
     {
-        $value = 0;
-        $countTotal = 0;
+        $this->fieldDefinitionFactory = $fieldDefinitionFactory;
+    }
+
+    public function setDataQualityPercent(AbstractObject $dataObject, array $items, string $fieldName): int
+    {
+        $value         = 0;
+        $countTotal    = 0;
         $countComplete = 0;
-        $setter = 'set' . \ucfirst(self::DATA_QUALITY_PERCENT);
+        $setter        = 'set' . \ucfirst($fieldName);
 
         if (\method_exists(
-            '\\Pimcore\\Model\\DataObject\\' . $dataObject->getClassName(),
+            $dataObject,
             $setter
         )) {
-            \Pimcore\Model\Version::disable();
-
-            foreach ($items as $area) {
-                foreach ($area['fields'] as $field) {
-                    $countTotal++;
-                    if ($field['isEmpty'] === false) {
-                        $countComplete++;
+            foreach ($items as $group) {
+                foreach ($group['fields'] as $field) {
+                    $countTotal = $countTotal + (1 * $field['weight']);
+                    if ($field['valid']) {
+                        $countComplete = $countComplete + (1 * $field['weight']);
                     }
                 }
             }
 
             $value = (int) \round(($countComplete / $countTotal) * 100);
+
+            DataObjectVersion::disable();
+
             $dataObject->$setter($value);
             $dataObject->save();
+
+            DataObjectVersion::enable();
         }
 
         return $value;
     }
 
-    public function getDataQualityPercent(AbstractObject $dataObject): int
-    {
-        $value = 0;
-        $getter = 'get' . \ucfirst(self::DATA_QUALITY_PERCENT);
-
-        if (\method_exists(
-            '\\Pimcore\\Model\\DataObject\\' . $dataObject->getClassName(),
-            $getter
-        )) {
-            $value = $dataObject->$getter();
-        }
-
-        return $value;
-    }
-
-    public function getDataQualityConfig(?AbstractObject $dataObject): ?DataQualityConfig
+    /**
+     * @return DataQualityConfig[]
+     */
+    public function getDataQualityConfig(?AbstractObject $dataObject): array
     {
         $dataQualityConfigList = new DataQualityConfig\Listing();
 
+        $dataQualityConfigs = [];
         foreach ($dataQualityConfigList as $dataQualityConfig) {
-            $dataQualityType = $dataQualityConfig->getDataQualityType();
-            if ($dataObject && $dataObject->getClassId() === $dataQualityType) {
-                return $dataQualityConfig;
+            $dataQualityClass = $dataQualityConfig->getDataQualityClass();
+            if ($dataObject && $dataObject->getClassId() === $dataQualityClass) {
+                $dataQualityConfigs[$dataQualityConfig->getId()] = $dataQualityConfig;
             }
         }
 
-        return null;
+        return $dataQualityConfigs;
     }
 
-
-    public function getDataQualityRule(DataQualityConfig $dataQualityConfig): ?DataQualityConfig\DataQulalityRule
+    public function getDataQualityData(AbstractObject $dataObject, DataQualityConfig $dataQualityConfig): array
     {
-        return $dataQualityConfig->getDataQulalityRule();
-    }
+        $dataQualityRules = $this->getDataQualityRules($dataQualityConfig);
 
-    public function getDataQualityFields(AbstractObject $dataObject, array $dataFields): array
-    {
-        $objectData = [];
-
-        foreach ($dataFields as $fieldName) {
-            $value = null;
-            $fieldNameSplit = \explode('@@@', $fieldName);
-            $getter = 'get' . \ucfirst($fieldNameSplit[0]);
-
-            if (\method_exists(
-                '\\Pimcore\\Model\\DataObject\\' . $dataObject->getClassName(),
-                $getter
-            )) {
-                $value = $dataObject->$getter();
-            }
-
-            $objectData[] = [
-                'name' => $fieldNameSplit[1] ?: $fieldNameSplit[0],
-                'isEmpty' => empty($value)
-            ];
-        }
-
-        return $objectData;
-    }
-
-    public function getDataQualityData(AbstractObject $dataObject, DataQualityConfig\DataQulalityRule $dataQualityRule): array
-    {
         $data = ['items' => []];
 
-        foreach ($dataQualityRule->getItems() as $dataQualityRuleItem) {
-            if ($dataQualityRuleItem instanceof DataObject\Objectbrick\Data\ObjectCompletion) {
-                foreach ($dataQualityRuleItem->getArea() as $area) {
-                    $data['items'][] = [
-                        'name' => $area['AreaName']->getData(),
-                        'fields' => $this->getDataQualityFields($dataObject, $area['AreaFields']->getData())
+        foreach ($dataQualityRules as $dataQualityRuleGroupName => $dataQualityRuleGroup) {
+            $fields = [];
+            foreach ($dataQualityRuleGroup as $fieldDefinition) {
+                /** @var FieldDefinition $fieldDefinition */
+                $getter = 'get' . $fieldDefinition->getFieldName();
+                if (method_exists($dataObject, $getter)) {
+                    $value     = $dataObject->$getter();
+                    $fieldType = $dataObject->getClass()->getFieldDefinition($fieldDefinition->getFieldName())->getFieldtype();
+                    // bastodo: how to deal with multilanguage fields
+                    $fields[] = [
+                        'valid'  => $fieldDefinition->getConditionClass()->validate($value, $fieldType, $fieldDefinition->getParameters()),
+                        'name'   => $fieldDefinition->getTitle(),
+                        'weight' => $fieldDefinition->getWeight()
                     ];
                 }
             }
+            $data['items'][] = [
+                'name'   => $dataQualityRuleGroupName,
+                'fields' => $fields
+            ];
         }
 
-        $data['percent'] = $this->setDataQualityPercent($dataObject, $data['items']);
+        $data['percent'] = $this->setDataQualityPercent($dataObject, $data['items'], $dataQualityConfig->getDataQualityField());
+        $data['title']   = $dataQualityConfig->getDataQualityName();
 
         return $data;
+    }
+
+    public function getDataQualityRules(DataQualityConfig $dataQualityConfig): array
+    {
+        $fieldcollection = $dataQualityConfig->getDataQualityRules();
+        $items           = $fieldcollection->getItems();
+
+        $rules = [];
+
+        /** @var DataQualityFieldDefinition $item */
+        foreach ($items as $item) {
+            $group           = empty($item->getGroup()) ? FieldDefinitionFactory::DEFAULT_GROUP : $item->getGroup();
+            $rules[$group][] = $this->fieldDefinitionFactory->get($item);
+        }
+
+        return $rules;
     }
 }

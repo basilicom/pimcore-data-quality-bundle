@@ -3,47 +3,47 @@
 namespace Basilicom\DataQualityBundle\Service;
 
 use Basilicom\DataQualityBundle\Provider\DataQualityProvider;
-use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\AbstractObject;
 use Pimcore\Model\DataObject\DataQualityConfig;
 
 class DataQualityService
 {
-    /** @var DataQualityProvider */
-    private $dataQualityProvider;
+    private DataQualityProvider $dataQualityProvider;
 
     public function __construct(DataQualityProvider $dataQualityProvider)
     {
         $this->dataQualityProvider = $dataQualityProvider;
     }
 
-    public function setDataQualityPercent(AbstractObject $dataObject, array $items): int
-    {
-        return $this->dataQualityProvider->setDataQualityPercent($dataObject, $items);
-    }
-
-    public function getDataQualityPercent(AbstractObject $dataObject): int
-    {
-        return $this->dataQualityProvider->getDataQualityPercent($dataObject);
-    }
-
-    public function getDataQualityConfig(?AbstractObject $dataObject): ?DataQualityConfig
+    /**
+     * @return DataQualityConfig[]
+     */
+    public function getDataQualityConfig(?AbstractObject $dataObject): array
     {
         return $this->dataQualityProvider->getDataQualityConfig($dataObject);
     }
 
-    public function getDataQualityRule(DataQualityConfig $dataQualityConfig): ?DataQualityConfig\DataQulalityRule
+    public function calculateDataQuality(AbstractObject $dataObject, DataQualityConfig $dataQualityConfig): array
     {
-        return $this->dataQualityProvider->getDataQualityRule($dataQualityConfig);
+        $setting = $this->temporarilyEnableInheritance();
+
+        $data = $this->dataQualityProvider->getDataQualityData($dataObject, $dataQualityConfig);
+
+        $this->restoreInheritance($setting);
+
+        return $data;
     }
 
-    public function getDataQualityFields(AbstractObject $dataObject, array $dataFields): array
+    private function temporarilyEnableInheritance(): bool
     {
-        return $this->dataQualityProvider->getDataQualityFields($dataObject, $dataFields);
+        $oldInheritedValuesSetting = AbstractObject::getGetInheritedValues();
+        AbstractObject::setGetInheritedValues(true);
+
+        return $oldInheritedValuesSetting;
     }
 
-    public function getDataQualityData(AbstractObject $dataObject, DataQualityConfig\DataQulalityRule $dataQualityRule): array
+    private function restoreInheritance(bool $oldInheritedValuesSetting)
     {
-        return $this->dataQualityProvider->getDataQualityData($dataObject, $dataQualityRule);
+        AbstractObject::setGetInheritedValues($oldInheritedValuesSetting);
     }
 }

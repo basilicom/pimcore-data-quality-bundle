@@ -20,8 +20,8 @@
     }
   ],
   "require": {
-    "php": ">=7.3",
-    "pimcore/pimcore": ">=6.0 <7.0"
+    "php": ">=8.0",
+    "pimcore/pimcore": ">=10"
   },
   "autoload": {
     "psr-4": {
