@@ -18,16 +18,16 @@ class DataQualityService
     /**
      * @return DataQualityConfig[]
      */
-    public function getDataQualityConfig(?AbstractObject $dataObject): array
+    public function getDataQualityConfigs(?AbstractObject $dataObject): array
     {
-        return $this->dataQualityProvider->getDataQualityConfig($dataObject);
+        return $this->dataQualityProvider->getDataQualityConfigs($dataObject);
     }
 
     public function calculateDataQuality(AbstractObject $dataObject, DataQualityConfig $dataQualityConfig): array
     {
         $setting = $this->temporarilyEnableInheritance();
 
-        $data = $this->dataQualityProvider->getDataQualityData($dataObject, $dataQualityConfig);
+        $data = $this->dataQualityProvider->calculateDataQuality($dataObject, $dataQualityConfig);
 
         $this->restoreInheritance($setting);
 

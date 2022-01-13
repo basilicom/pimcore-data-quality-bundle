@@ -2,6 +2,8 @@
 
 namespace Basilicom\DataQualityBundle\Definition;
 
+use Pimcore\Model\DataObject\ClassDefinition\Data;
+
 abstract class DefinitionAbstract implements DefinitionInterface
 {
     const NECESSARY_PARAMETER_COUNT = 0;
@@ -13,7 +15,10 @@ abstract class DefinitionAbstract implements DefinitionInterface
         return static::NECESSARY_PARAMETER_COUNT;
     }
 
-    public function validate($content, string $fieldType, array $parameters): bool
+    /**
+     * @throws DefinitionException
+     */
+    public function validate($content, Data $fieldDefinition, array $parameters): bool
     {
         return false;
     }

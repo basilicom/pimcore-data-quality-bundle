@@ -2,12 +2,20 @@
 
 namespace Basilicom\DataQualityBundle\Definition;
 
+use Pimcore\Model\DataObject\ClassDefinition\Data;
+
 class MinimumStringLengthDefinition extends DefinitionAbstract
 {
     const NECESSARY_PARAMETER_COUNT = 1;
 
-    public function validate($content, string $fieldType, array $parameters): bool
+    /**
+     * @throws DefinitionException
+     */
+    public function validate($content, Data $fieldDefinition, array $parameters): bool
     {
+        $fieldName = $fieldDefinition->getName();
+        $fieldType = $fieldDefinition->getFieldtype();
+
         switch ($fieldType) {
             case 'input':
             case 'textarea':
@@ -26,8 +34,7 @@ class MinimumStringLengthDefinition extends DefinitionAbstract
 
                 return true;
             default:
-                // wrong field type
-                return false;
+                throw new DefinitionException('fieldtype ' . $fieldType . ' of field ' . $fieldName . ' is not supported.');
         }
     }
 }

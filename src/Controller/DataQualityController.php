@@ -42,7 +42,7 @@ class DataQualityController extends FrontendController
                 throw new DataQualityException($translator->trans('dataQuality.error.missing_data_object', [], 'admin'));
             }
 
-            $dataQualityConfigs = $this->dataQualityService->getDataQualityConfig($dataObject);
+            $dataQualityConfigs = $this->dataQualityService->getDataQualityConfigs($dataObject);
             if (empty($dataQualityConfigs)) {
                 throw new DataQualityException($translator->trans('dataQuality.error.missing_config', [], 'admin'));
             }
@@ -79,8 +79,8 @@ class DataQualityController extends FrontendController
                 throw new DataQualityException('class has no data quality.');
             }
 
-            $dataQualityConfig = $this->dataQualityService->getDataQualityConfig($dataObject);
-            if (empty($dataQualityConfig)) {
+            $dataQualityConfigs = $this->dataQualityService->getDataQualityConfigs($dataObject);
+            if (empty($dataQualityConfigs)) {
                 throw new DataQualityException('class has no data quality.');
             }
 

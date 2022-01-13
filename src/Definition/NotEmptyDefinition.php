@@ -2,10 +2,14 @@
 
 namespace Basilicom\DataQualityBundle\Definition;
 
+use Pimcore\Model\DataObject\ClassDefinition\Data;
+
 class NotEmptyDefinition extends DefinitionAbstract
 {
-    public function validate($content, string $fieldType, array $parameters): bool
+    public function validate($content, Data $fieldDefinition, array $parameters): bool
     {
+        $fieldType = $fieldDefinition->getFieldtype();
+
         switch ($fieldType) {
             case 'input':
             case 'textarea':

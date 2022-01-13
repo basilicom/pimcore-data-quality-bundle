@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace Basilicom\DataQualityBundle\Provider;
 
+use Basilicom\DataQualityBundle\Definition\DefinitionException;
 use Basilicom\DataQualityBundle\DefinitionsCollection\Factory\FieldDefinitionFactory;
 use Basilicom\DataQualityBundle\DefinitionsCollection\FieldDefinition;
+use Basilicom\DataQualityBundle\Exception\DataQualityException;
 use Pimcore\Model\DataObject\AbstractObject;
 use Pimcore\Model\DataObject\DataQualityConfig;
 use Pimcore\Model\DataObject\Fieldcollection\Data\DataQualityFieldDefinition;
@@ -55,7 +57,7 @@ final class DataQualityProvider
     /**
      * @return DataQualityConfig[]
      */
-    public function getDataQualityConfig(?AbstractObject $dataObject): array
+    public function getDataQualityConfigs(?AbstractObject $dataObject): array
     {
         $dataQualityConfigList = new DataQualityConfig\Listing();
 
@@ -70,7 +72,10 @@ final class DataQualityProvider
         return $dataQualityConfigs;
     }
 
-    public function getDataQualityData(AbstractObject $dataObject, DataQualityConfig $dataQualityConfig): array
+    /**
+     * @throws DataQualityException|DefinitionException
+     */
+    public function calculateDataQuality(AbstractObject $dataObject, DataQualityConfig $dataQualityConfig): array
     {
         $dataQualityRules = $this->getDataQualityRules($dataQualityConfig);
 
@@ -82,13 +87,18 @@ final class DataQualityProvider
                 /** @var FieldDefinition $fieldDefinition */
                 $getter = 'get' . $fieldDefinition->getFieldName();
                 if (method_exists($dataObject, $getter)) {
-                    $value     = $dataObject->$getter();
-                    $fieldType = $dataObject->getClass()->getFieldDefinition($fieldDefinition->getFieldName())->getFieldtype();
+                    $value                = $dataObject->$getter();
+                    $classFieldDefinition = $dataObject->getClass()->getFieldDefinition($fieldDefinition->getFieldName());
+                    if (empty($classFieldDefinition)) {
+                        throw new DataQualityException('fieldtype for field ' . $fieldDefinition->getFieldName() . ' is not supported, yet.');
                     // bastodo: how to deal with multilanguage fields
+                    } else {
+                        $valid = $fieldDefinition->getConditionClass()->validate($value, $classFieldDefinition, $fieldDefinition->getParameters());
+                    }
                     $fields[] = [
-                        'valid'  => $fieldDefinition->getConditionClass()->validate($value, $fieldType, $fieldDefinition->getParameters()),
+                        'valid'  => $valid,
                         'name'   => $fieldDefinition->getTitle(),
-                        'weight' => $fieldDefinition->getWeight()
+                        'weight' => $fieldDefinition->getWeight(),
                     ];
                 }
             }

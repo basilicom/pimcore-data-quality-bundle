@@ -53,6 +53,9 @@ class ObjectFieldsProvider implements SelectOptionsProviderInterface
         $localizedField   = [];
         $fieldDefinitions = $class->getFieldDefinitions();
         foreach ($fieldDefinitions as $name => $field) {
+            // bastodo: object Bricks
+            // bastodo: field Collections
+            // bastodo: blocks
             if ($name === 'localizedfields') {
                 /** @var Localizedfields $field */
                 $children = $field->getFieldDefinitions();

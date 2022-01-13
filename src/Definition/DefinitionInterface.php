@@ -2,16 +2,20 @@
 
 namespace Basilicom\DataQualityBundle\Definition;
 
+use Pimcore\Model\DataObject\ClassDefinition\Data;
+
 interface DefinitionInterface
 {
     /**
      * @param $content
-     * @param string $fieldType
+     * @param Data $fieldDefinition
      * @param array $parameters
      *
      * @return bool
+     *
+     * @throws DefinitionException
      */
-    public function validate($content, string $fieldType, array $parameters): bool;
+    public function validate($content, Data $fieldDefinition, array $parameters): bool;
 
     /**
      * @return int
