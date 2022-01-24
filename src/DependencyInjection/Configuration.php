@@ -18,8 +18,6 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('data_quality');
-
-        return $treeBuilder;
+        return new TreeBuilder('data_quality');
     }
 }

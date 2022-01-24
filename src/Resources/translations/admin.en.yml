@@ -1,0 +1,33 @@
+dataQualityConfig:
+  field:
+    dataQualityName: Name
+    dataQualityField: Choose Field
+    dataQualityClass: Choose Class
+    dataQualityRules: Rules
+  text:
+    dataQualityDescriptionClass: Please choose the class you want to analyse.
+    dataQualityDescriptionField: Please choose the field of that class, where the data quality percent value will be stored.
+    dataQualityRules: Here you can add as many rules as you need.
+    title: Data Quality Field Definition
+
+dataQualityFieldDefinition:
+  field:
+    field: Field
+    group: Group
+    parameters: Parameters
+    condition: Condition
+    weight: Weight
+
+dataQuality:
+  error:
+    general: An error occured.
+    missing_config: The data quality configuration is missing.
+    missing_data_object: The data object is missing.
+
+  label:
+    total: Total Quality
+    default-group: Default
+
+dataQualityConfigId:
+  label: Object Id
+  explanation: Choose the DataQualityConfig data object id to only show the one entry. Leave empty to show all DataQualityConfig lists attached to the class type.

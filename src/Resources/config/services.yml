@@ -17,8 +17,10 @@ services:
     Basilicom\DataQualityBundle\Tools\Installer:
       public: true
       arguments:
-        # fetch the bundle via expression language
         $bundle: "@=service('kernel').getBundle('DataQualityBundle')"
+
+    Basilicom\DataQualityBundle\DefinitionsCollection\Factory\FieldDefinitionFactory:
+      public: true
 
     Basilicom\DataQualityBundle\Service\DataQualityService:
       public: true
@@ -30,10 +32,24 @@ services:
       tags:
         - { name: kernel.event_listener, event: pimcore.dataobject.postUpdate, method: onPostUpdate }
 
-    object_type.options_provider:
-      class: \Basilicom\DataQualityBundle\Model\Provider\ObjectTypeProvider
+    #
+    # custom Renderer
+    #
+    custom_renderer.data_quality_config:
+      class: Basilicom\DataQualityBundle\Model\Renderer\DataQualityConfigRenderer
       public: true
 
-    object_fields.options_provider:
-      class: \Basilicom\DataQualityBundle\Model\Provider\ObjectFieldsProvider
+    #
+    # option providers
+    #
+    options_provider.object_classes:
+      class: Basilicom\DataQualityBundle\Model\Provider\ObjectClassesProvider
+      public: true
+
+    options_provider.object_fields:
+      class: Basilicom\DataQualityBundle\Model\Provider\ObjectFieldsProvider
+      public: true
+
+    options_provider.definitions:
+      class: Basilicom\DataQualityBundle\Model\Provider\DefinitionsProvider
       public: true

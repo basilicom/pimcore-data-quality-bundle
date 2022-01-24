@@ -5,76 +5,96 @@ namespace Basilicom\DataQualityBundle\Model\Provider;
 
 use Pimcore\Model\DataObject\ClassDefinition;
 use Pimcore\Model\DataObject\ClassDefinition\Data\Localizedfields;
+use Pimcore\Model\DataObject\ClassDefinition\Data\Select;
 use Pimcore\Model\DataObject\ClassDefinition\DynamicOptionsProvider\SelectOptionsProviderInterface;
 use Pimcore\Model\DataObject\DataQualityConfig;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ObjectFieldsProvider implements SelectOptionsProviderInterface
 {
-    /**
-     * @param array $context
-     * @param ClassDefinition\Data $fieldDefinition
-     * @return array
-     */
-    public function getOptions($context, $fieldDefinition)
-    {
-        $result = [];
-        $object = isset($context["object"]) ? $context["object"] : null;
+    private TranslatorInterface $translator;
 
-        if ($object === null) {
-            return $result;
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
+
+    public function getOptions($context, $fieldDefinition): array
+    {
+        $fieldName = $context['fieldname'];
+        if ($fieldName !== 'Field' && $fieldName !== 'DataQualityField') {
+            return [];
         }
 
         /** @var DataQualityConfig $object */
-        $dataQualityTypeId = $object->getDataQualityType();
-        $classType = ClassDefinition::getById($dataQualityTypeId);
-
-        if ($classType === null) {
-            return $result;
+        $object = $context['object'];
+        if (empty($object)) {
+            return [];
         }
 
-        $fieldDefinitions = $classType->getFieldDefinitions();
+        $dataQualityClassId = $object->getDataQualityClass();
+        if (empty($dataQualityClassId)) {
+            return [];
+        }
 
-        foreach ($fieldDefinitions as $field) {
-            $name = $field->getName();
+        $class = ClassDefinition::getById($dataQualityClassId);
+        if (empty($class)) {
+            return [];
+        }
 
+        /** @var Select $fieldDefinition */
+        $data           = $fieldDefinition->getOptionsProviderData();
+        $onlyFieldNames = false;
+        if (!empty($data) && $data === 'onlyFieldNames') {
+            $onlyFieldNames = true;
+        }
+
+        $result           = [];
+        $localizedField   = [];
+        $fieldDefinitions = $class->getFieldDefinitions();
+        foreach ($fieldDefinitions as $name => $field) {
+            // bastodo: object Bricks
+            // bastodo: field Collections
+            // bastodo: blocks
             if ($name === 'localizedfields') {
                 /** @var Localizedfields $field */
-                $children = $field->getChildren();
+                $children = $field->getFieldDefinitions();
 
                 foreach ($children as $child) {
-                    $result[] = [
-                        'key' => $child->getTitle() ?: $child->getName(),
-                        'value' => $child->getName() . '@@@' . $child->getTitle(),
+                    $title = $this->translator->trans($child->getTitle(), [], 'admin');
+                    $value = $child->getName();
+                    if (!$onlyFieldNames) {
+                        $value .= '@@@' . $title;
+                    }
+                    $localizedField[] = [
+                        'key'   => 'Localized: ' . $title . ' (' . $child->getName() . ')',
+                        'value' => $value,
                     ];
                 }
-
+                // bastodo: maybe use this for sorting localized Fields
+//              $bla = $class->getLayoutDefinitions();
             } else {
+                $title = $this->translator->trans($field->getTitle(), [], 'admin');
+                $value = $name;
+                if (!$onlyFieldNames) {
+                    $value .= '@@@' . $title;
+                }
                 $result[] = [
-                    'key' => $field->getTitle() ?: $name,
-                    'value' => $name . '@@@' . $field->getTitle(),
+                    'key'   => $title . ' (' . $name . ')',
+                    'value' => $value,
                 ];
             }
         }
 
-        return $result;
+        return array_merge($result, $localizedField);
     }
 
-    /**
-     * @param array $context
-     * @param ClassDefinition\Data $fieldDefinition
-     * @return mixed
-     */
-    public function getDefaultValue($context, $fieldDefinition)
+    public function getDefaultValue($context, $fieldDefinition): ?string
     {
         return $fieldDefinition->getDefaultValue();
     }
 
-    /**
-     * @param array $context
-     * @param ClassDefinition\Data $fieldDefinition
-     * @return bool
-     */
-    public function hasStaticOptions($context, $fieldDefinition)
+    public function hasStaticOptions($context, $fieldDefinition): bool
     {
         return false;
     }

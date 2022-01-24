@@ -1,25 +1,25 @@
 {
     "id": "DQC",
     "description": "",
+    "modificationDate": 1642009954,
     "parentClass": "",
     "implementsInterfaces": "",
     "listingParentClass": "",
     "useTraits": "",
     "listingUseTraits": "",
     "allowInherit": false,
-    "allowVariants": null,
+    "allowVariants": false,
     "showVariants": false,
     "layoutDefinitions": {
         "fieldtype": "panel",
-        "labelWidth": 100,
         "layout": null,
         "border": false,
         "name": "pimcore_root",
         "type": null,
         "region": null,
         "title": null,
-        "width": null,
-        "height": null,
+        "width": 0,
+        "height": 0,
         "collapsible": false,
         "collapsed": false,
         "bodyStyle": null,
@@ -28,15 +28,14 @@
         "childs": [
             {
                 "fieldtype": "panel",
-                "labelWidth": 180,
                 "layout": null,
                 "border": false,
                 "name": "Layout",
                 "type": null,
                 "region": null,
                 "title": "",
-                "width": null,
-                "height": null,
+                "width": "",
+                "height": "",
                 "collapsible": false,
                 "collapsed": false,
                 "bodyStyle": "",
@@ -45,16 +44,16 @@
                 "childs": [
                     {
                         "fieldtype": "text",
-                        "html": "<div class=\"alert alert-info\">\nHere you can add as many rules as you need\n<\/div>",
-                        "renderingClass": "",
+                        "html": "",
+                        "renderingClass": "@custom_renderer.data_quality_config",
                         "renderingData": "",
                         "border": false,
-                        "name": "Layout",
+                        "name": "DataQualityInfo",
                         "type": null,
                         "region": null,
                         "title": "",
-                        "width": null,
-                        "height": null,
+                        "width": "",
+                        "height": "",
                         "collapsible": false,
                         "collapsed": false,
                         "bodyStyle": "",
@@ -64,112 +63,40 @@
                         "locked": false
                     },
                     {
+                        "fieldtype": "input",
+                        "width": 340,
+                        "defaultValue": null,
+                        "columnLength": 190,
+                        "regex": "",
+                        "unique": false,
+                        "showCharCount": false,
+                        "name": "DataQualityName",
+                        "title": "dataQualityConfig.field.dataQualityName",
+                        "tooltip": "",
+                        "mandatory": false,
+                        "noteditable": false,
+                        "index": false,
+                        "locked": false,
+                        "style": "",
+                        "permissions": null,
+                        "datatype": "data",
+                        "relationType": false,
+                        "invisible": false,
+                        "visibleGridView": false,
+                        "visibleSearch": false,
+                        "defaultValueGenerator": ""
+                    },
+                    {
                         "fieldtype": "select",
-                        "options": [
-                            {
-                                "key": "CustomerSegmentGroup (1)",
-                                "value": "1"
-                            },
-                            {
-                                "key": "CustomerSegment (2)",
-                                "value": "2"
-                            },
-                            {
-                                "key": "SsoIdentity (3)",
-                                "value": "3"
-                            },
-                            {
-                                "key": "TermSegmentBuilderDefinition (4)",
-                                "value": "4"
-                            },
-                            {
-                                "key": "LinkActivityDefinition (5)",
-                                "value": "5"
-                            },
-                            {
-                                "key": "AccessoryPart (AP)",
-                                "value": "AP"
-                            },
-                            {
-                                "key": "BodyStyle (BS)",
-                                "value": "BS"
-                            },
-                            {
-                                "key": "Category (CA)",
-                                "value": "CA"
-                            },
-                            {
-                                "key": "Car (CAR)",
-                                "value": "CAR"
-                            },
-                            {
-                                "key": "Customer (CU)",
-                                "value": "CU"
-                            },
-                            {
-                                "key": "DataQualityConfig (DQC)",
-                                "value": "DQC"
-                            },
-                            {
-                                "key": "FilterDefinition (EF_FD)",
-                                "value": "EF_FD"
-                            },
-                            {
-                                "key": "OnlineShopOrder (EF_OSO)",
-                                "value": "EF_OSO"
-                            },
-                            {
-                                "key": "OnlineShopOrderItem (EF_OSOI)",
-                                "value": "EF_OSOI"
-                            },
-                            {
-                                "key": "OnlineShopTaxClass (EF_OSTC)",
-                                "value": "EF_OSTC"
-                            },
-                            {
-                                "key": "OnlineShopVoucherSeries (EF_OSVS)",
-                                "value": "EF_OSVS"
-                            },
-                            {
-                                "key": "OnlineShopVoucherToken (EF_OSVT)",
-                                "value": "EF_OSVT"
-                            },
-                            {
-                                "key": "OfferToolCustomProduct (EF_OTCP)",
-                                "value": "EF_OTCP"
-                            },
-                            {
-                                "key": "OfferToolOffer (EF_OTO)",
-                                "value": "EF_OTO"
-                            },
-                            {
-                                "key": "OfferToolOfferItem (EF_OTOI)",
-                                "value": "EF_OTOI"
-                            },
-                            {
-                                "key": "Event (EV)",
-                                "value": "EV"
-                            },
-                            {
-                                "key": "Manufacturer (MA)",
-                                "value": "MA"
-                            },
-                            {
-                                "key": "News (NE)",
-                                "value": "NE"
-                            }
-                        ],
+                        "options": null,
                         "width": 340,
                         "defaultValue": "",
-                        "optionsProviderClass": "@object_type.options_provider",
+                        "optionsProviderClass": "@options_provider.object_classes",
                         "optionsProviderData": "",
-                        "queryColumnType": "varchar",
-                        "columnType": "varchar",
                         "columnLength": 190,
-                        "phpdocType": "string",
                         "dynamicOptions": false,
-                        "name": "DataQualityType",
-                        "title": "Data Quality Type",
+                        "name": "DataQualityClass",
+                        "title": "dataQualityConfig.field.dataQualityClass",
                         "tooltip": "",
                         "mandatory": true,
                         "noteditable": false,
@@ -185,62 +112,95 @@
                         "defaultValueGenerator": ""
                     },
                     {
-                        "fieldtype": "panel",
-                        "labelWidth": 100,
-                        "layout": null,
+                        "fieldtype": "select",
+                        "options": null,
+                        "width": 340,
+                        "defaultValue": "",
+                        "optionsProviderClass": "@options_provider.object_fields",
+                        "optionsProviderData": "onlyFieldNames",
+                        "columnLength": 190,
+                        "dynamicOptions": false,
+                        "name": "DataQualityField",
+                        "title": "dataQualityConfig.field.dataQualityField",
+                        "tooltip": "",
+                        "mandatory": true,
+                        "noteditable": false,
+                        "index": false,
+                        "locked": false,
+                        "style": "",
+                        "permissions": null,
+                        "datatype": "data",
+                        "relationType": false,
+                        "invisible": false,
+                        "visibleGridView": false,
+                        "visibleSearch": false,
+                        "defaultValueGenerator": ""
+                    },
+                    {
+                        "fieldtype": "text",
+                        "html": "<br>",
+                        "renderingClass": "@custom_renderer.data_quality_config",
+                        "renderingData": "",
                         "border": false,
-                        "name": "Layout",
+                        "name": "DataQualityRulesInfo",
                         "type": null,
                         "region": null,
-                        "title": "",
-                        "width": null,
-                        "height": null,
+                        "title": "dataQualityConfig.field.dataQualityRules",
+                        "width": "",
+                        "height": "",
                         "collapsible": false,
                         "collapsed": false,
-                        "bodyStyle": "padding: 20px 0 0;",
+                        "bodyStyle": "",
                         "datatype": "layout",
                         "permissions": null,
-                        "childs": [
-                            {
-                                "fieldtype": "objectbricks",
-                                "phpdocType": "\\Pimcore\\Model\\DataObject\\Objectbrick",
-                                "allowedTypes": [
-                                    "ObjectCompletion"
-                                ],
-                                "maxItems": "",
-                                "border": false,
-                                "name": "DataQulalityRule",
-                                "title": "",
-                                "tooltip": "",
-                                "mandatory": false,
-                                "noteditable": false,
-                                "index": false,
-                                "locked": false,
-                                "style": "margin-bottom: 0;",
-                                "permissions": null,
-                                "datatype": "data",
-                                "relationType": false,
-                                "invisible": false,
-                                "visibleGridView": false,
-                                "visibleSearch": false
-                            }
+                        "childs": [],
+                        "locked": false
+                    },
+                    {
+                        "fieldtype": "fieldcollections",
+                        "allowedTypes": [
+                            "DataQualityFieldDefinition"
                         ],
+                        "lazyLoading": true,
+                        "maxItems": "",
+                        "disallowAddRemove": false,
+                        "disallowReorder": false,
+                        "collapsed": false,
+                        "collapsible": false,
+                        "border": false,
+                        "name": "DataQualityRules",
+                        "title": "",
+                        "tooltip": "",
+                        "mandatory": false,
+                        "noteditable": false,
+                        "index": false,
                         "locked": false,
-                        "icon": ""
+                        "style": "",
+                        "permissions": null,
+                        "datatype": "data",
+                        "relationType": false,
+                        "invisible": false,
+                        "visibleGridView": false,
+                        "visibleSearch": false
                     }
                 ],
                 "locked": false,
-                "icon": ""
+                "icon": "",
+                "labelWidth": 180,
+                "labelAlign": "left"
             }
         ],
         "locked": false,
-        "icon": null
+        "icon": null,
+        "labelWidth": 100,
+        "labelAlign": "left"
     },
     "icon": "",
     "previewUrl": "",
     "group": "",
     "showAppLoggerTab": false,
     "linkGeneratorReference": "",
+    "previewGeneratorReference": "",
     "compositeIndices": [],
     "generateTypeDeclarations": false,
     "showFieldLookup": false,

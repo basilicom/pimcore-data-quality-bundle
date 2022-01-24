@@ -3,86 +3,43 @@ declare(strict_types=1);
 
 namespace Basilicom\DataQualityBundle\Tools;
 
-use Doctrine\DBAL\Migrations\AbortMigrationException;
-use Doctrine\DBAL\Migrations\Version;
-use Doctrine\DBAL\Schema\Schema;
-use Pimcore\Db\ConnectionInterface;
-use Pimcore\Extension\Bundle\Installer\MigrationInstaller;
-use Pimcore\Migrations\Migration\InstallMigration;
-use Pimcore\Migrations\MigrationManager;
+use Pimcore\Extension\Bundle\Installer\Exception\InstallationException;
+use Pimcore\Extension\Bundle\Installer\SettingsStoreAwareInstaller;
 use Pimcore\Model\DataObject\ClassDefinition;
 use Pimcore\Model\DataObject\ClassDefinition\Service;
-use Pimcore\Model\DataObject\Objectbrick;
+use Pimcore\Model\DataObject\Fieldcollection;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
-class Installer extends MigrationInstaller
+class Installer extends SettingsStoreAwareInstaller
 {
-    /** @var string */
-    private $installSourcesPath;
-
-    /** @var array */
-    private $classesToInstall = [
+    private string $installSourcesPath;
+    private array $classesToInstall = [
         'DataQualityConfig' => 'DQC',
     ];
 
-    /**
-     * @param BundleInterface $bundle
-     * @param ConnectionInterface $connection
-     * @param MigrationManager $migrationManager
-     */
     public function __construct(
         BundleInterface $bundle,
-        ConnectionInterface $connection,
-        MigrationManager $migrationManager
     ) {
         $this->installSourcesPath = __DIR__ . '/../Resources/install';
 
-        parent::__construct($bundle, $connection, $migrationManager);
+        parent::__construct($bundle);
     }
 
-    /**
-     * @param Schema $schema
-     * @param Version $version
-     *
-     * @return void
-     *
-     * @throws \Exception
-     */
-    public function migrateInstall(Schema $schema, Version $version): void
+    public function install()
     {
-        /** @var InstallMigration $migration */
-        $migration = $version->getMigration();
-
-        if ($migration->isDryRun()) {
-            $this->outputWriter->write('<fg=cyan>DRY-RUN:</> Skipping installation');
-
-            return;
-        }
-
+        $this->installFieldCollection();
         $this->installClasses();
-        $this->installObjectBricks();
+
+        parent::install();
     }
 
-    /**
-     * @param Schema $schema
-     * @param Version $version
-     *
-     * @return void
-     */
-    public function migrateUninstall(Schema $schema, Version $version): void
+    public function uninstall(): void
     {
-        /** @var InstallMigration $migration */
-        $migration = $version->getMigration();
-
-        if ($migration->isDryRun()) {
-            $this->outputWriter->write('<fg=cyan>DRY-RUN:</> Skipping uninstallation');
-
-            return;
-        }
-
         $this->uninstallClasses();
-        $this->uninstallObjectBricks();
+        $this->uninstallFieldCollection();
+
+        parent::uninstall();
     }
 
     private function getClassesToInstall(): array
@@ -90,11 +47,11 @@ class Installer extends MigrationInstaller
         $result = [];
         foreach (\array_keys($this->classesToInstall) as $className) {
             $filename = \sprintf('class_%s_export.json', $className);
-            $path = $this->installSourcesPath . '/class_sources/' . $filename;
-            $path = \realpath($path);
+            $path     = $this->installSourcesPath . '/class_sources/' . $filename;
+            $path     = \realpath($path);
 
             if (false === $path || !\is_file($path)) {
-                throw new AbortMigrationException(\sprintf(
+                throw new InstallationException(\sprintf(
                     'Class export for class "%s" was expected in "%s" but file does not exist',
                     $className,
                     $path
@@ -113,10 +70,8 @@ class Installer extends MigrationInstaller
         $mapping = $this->classesToInstall;
 
         foreach ($classes as $key => $path) {
-            $class = ClassDefinition::getByName($key);
-
-            if ($class) {
-                $this->outputWriter->write(\sprintf(
+            if (ClassDefinition::getByName($key)) {
+                $this->getOutput()->write(\sprintf(
                     '     <comment>WARNING:</comment> Skipping class "%s" as it already exists',
                     $key
                 ));
@@ -124,17 +79,17 @@ class Installer extends MigrationInstaller
                 continue;
             }
 
-            $class = new ClassDefinition();
+            $class   = new ClassDefinition();
             $classId = $mapping[$key];
 
             $class->setName($key);
             $class->setId($classId);
 
-            $data = \file_get_contents($path);
+            $data    = \file_get_contents($path);
             $success = Service::importClassDefinitionFromJson($class, $data, false, true);
 
             if (!$success) {
-                throw new AbortMigrationException(\sprintf(
+                throw new InstallationException(\sprintf(
                     'Failed to create class "%s"',
                     $key
                 ));
@@ -155,61 +110,61 @@ class Installer extends MigrationInstaller
                 continue;
             }
 
-            $this->outputWriter->write(\sprintf(
+            $this->getOutput()->write(\sprintf(
                 '     <comment>WARNING:</comment> Skipping class "%s" as it doesn\'t exists',
                 $key
             ));
         }
     }
 
-    private function installObjectBricks()
+    private function installFieldCollection()
     {
-        $bricks = $this->findInstallFiles(
-            $this->installSourcesPath . '/objectbrick_sources',
-            '/^objectbrick_(.*)_export\.json$/'
+        $fieldcollections = $this->findInstallFiles(
+            $this->installSourcesPath . '/fieldcollection_sources',
+            '/^fieldcollection_(.*)_export\.json$/'
         );
 
-        foreach ($bricks as $key => $path) {
-            if ($brick = Objectbrick\Definition::getByKey($key)) {
-                $this->outputWriter->write(\sprintf(
-                    '     <comment>WARNING:</comment> Skipping object brick "%s" as it already exists',
+        foreach ($fieldcollections as $key => $path) {
+            if (Fieldcollection\Definition::getByKey($key)) {
+                $this->getOutput()->write(\sprintf(
+                    '     <comment>WARNING:</comment> Skipping fieldcollection "%s" as it already exists',
                     $key
                 ));
 
                 continue;
             }
 
-            $brick = new Objectbrick\Definition();
-            $brick->setKey($key);
+            $fieldcollection = new Fieldcollection\Definition();
+            $fieldcollection->setKey($key);
 
-            $data = \file_get_contents($path);
-            $success = Service::importObjectBrickFromJson($brick, $data);
+            $data    = \file_get_contents($path);
+            $success = Service::importFieldCollectionFromJson($fieldcollection, $data);
 
             if (!$success) {
-                throw new AbortMigrationException(\sprintf(
-                    'Failed to create object brick "%s"',
+                throw new InstallationException(\sprintf(
+                    'Failed to create object fieldcollection "%s"',
                     $key
                 ));
             }
         }
     }
 
-    private function uninstallObjectBricks()
+    private function uninstallFieldCollection()
     {
-        $bricks = $this->findInstallFiles(
-            $this->installSourcesPath . '/objectbrick_sources',
-            '/^objectbrick_(.*)_export\.json$/'
+        $fieldcollections = $this->findInstallFiles(
+            $this->installSourcesPath . '/fieldcollection_sources',
+            '/^fieldcollection_(.*)_export\.json$/'
         );
 
-        foreach ($bricks as $key => $path) {
-            if ($brick = Objectbrick\Definition::getByKey($key)) {
-                $brick->delete();
+        foreach ($fieldcollections as $key => $path) {
+            if ($fieldcollection = Fieldcollection\Definition::getByKey($key)) {
+                $fieldcollection->delete();
 
                 continue;
             }
 
-            $this->outputWriter->write(sprintf(
-                '     <comment>WARNING:</comment> Skipping object brick "%s" as it doesn\'t exists',
+            $this->getOutput()->write(sprintf(
+                '     <comment>WARNING:</comment> Skipping fieldcollection "%s" as it doesn\'t exists',
                 $key
             ));
         }
@@ -229,7 +184,7 @@ class Installer extends MigrationInstaller
         $results = [];
         foreach ($finder as $file) {
             if (\preg_match($pattern, $file->getFilename(), $matches)) {
-                $key = $matches[1];
+                $key           = $matches[1];
                 $results[$key] = $file->getRealPath();
             }
         }

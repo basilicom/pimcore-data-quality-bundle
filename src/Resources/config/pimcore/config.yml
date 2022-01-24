@@ -3,4 +3,4 @@ pimcore:
     class_definitions:
       layout:
         map:
-          dataQuality: \Basilicom\DataQualityBundle\Model\DataObject\ClassDefinition\Layout\DataQuality
+          dataQuality: Basilicom\DataQualityBundle\Model\DataObject\ClassDefinition\Layout\DataQuality

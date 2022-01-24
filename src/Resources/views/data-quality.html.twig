@@ -1,32 +1,49 @@
-{% extends '@DataQualityBundle/Resources/views/layout.html.twig' %}
+{% extends '@DataQuality/layout.html.twig' %}
 
 {% trans_default_domain 'admin' %}
 
 {% block body %}
-    {% if data is not empty %}
-        <div class="data-quality_container">
-            {% if data.percent > 0 %}
-              <h1>
-                  {{ 'dataQuality.label.total' | trans }}
-                  <span class="data-quality_percent{% if data.percent == 100 %} data-quality_percent--complete{% endif %}">{{ data.percent }}%</span>
-              </h1>
-            {% endif %}
-            {% for area in data.items %}
-                <div class="data-quality_area">
-                    <h2 class="data-quality_headline">
-                        {{ area.name | trans }}
-                    </h2>
-                    <table class="data-quality_table">
-                        {% for field in area.fields %}
-                            <tr class="data-quality_row">
-                                <td class="data-quality_column{{ field.isEmpty ? ' data-quality_column--empty' : '' }}">
-                                    {{ field.name | trans }}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </table>
+    <div class="data-quality{% if standalone %}__standalone{% endif %}">
+        {% if error is not empty %}
+            <div class="data-quality__error">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        {% if data is not empty %}
+            {% for qualityConfig in data %}
+                <div class="data-quality__container">
+                    <h1 class="data-quality__headline">
+                        {% if qualityConfig.title is empty %}
+                            {{ 'dataQuality.label.total' | trans }}
+                        {% else %}
+                            {{ qualityConfig.title }}:
+                        {% endif %}
+                        <span class="data-quality__percent{% if qualityConfig.percent == 100 %} data-quality__percent--complete{% endif %}">{{ qualityConfig.percent }}%</span>
+                    </h1>
+
+                    {% for group in qualityConfig.items %}
+                        <div class="data-quality__group">
+                            <h2 class="data-quality__group-headline">
+                                {% if group.name == constant('Basilicom\\DataQualityBundle\\DefinitionsCollection\\Factory\\FieldDefinitionFactory::DEFAULT_GROUP') %}
+                                    {{ 'dataQuality.label.default-group' | trans }}
+                                {% else %}
+                                    {{ group.name }}
+                                {% endif %}
+                            </h2>
+                            <table class="data-quality__table">
+                                {% for field in group.fields %}
+                                    <tr class="data-quality__row">
+                                        <td class="data-quality__column{{ not field.valid ? ' data-quality__column--invalid' : '' }}">
+                                            {{ field.name }} ({{ field.weight }})
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    {% endfor %}
                 </div>
             {% endfor %}
-        </div>
-    {% endif %}
+        {% endif %}
+    </div>
 {% endblock %}

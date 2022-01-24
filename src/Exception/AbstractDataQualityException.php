@@ -2,6 +2,8 @@
 
 namespace Basilicom\DataQualityBundle\Exception;
 
-abstract class AbstractDataQualityException extends \Exception
+use Exception;
+
+abstract class AbstractDataQualityException extends Exception
 {
 }
