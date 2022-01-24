@@ -3,6 +3,7 @@ pimcore.object.layout.dataQuality = Class.create(pimcore.object.abstract, {
 
   initialize: function (config, context) {
     this.config = config;
+    this.config.width = '100%';
     this.context = context;
     this.context["renderingData"] = this.config.renderingData;
     this.context["name"] = this.config.name;

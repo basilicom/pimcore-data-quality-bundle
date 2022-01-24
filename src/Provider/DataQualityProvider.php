@@ -65,7 +65,9 @@ final class DataQualityProvider
         foreach ($dataQualityConfigList as $dataQualityConfig) {
             $dataQualityClass = $dataQualityConfig->getDataQualityClass();
             if ($dataObject && $dataObject->getClassId() === $dataQualityClass) {
-                $dataQualityConfigs[$dataQualityConfig->getId()] = $dataQualityConfig;
+                if ($dataQualityConfig->isPublished()) {
+                    $dataQualityConfigs[$dataQualityConfig->getId()] = $dataQualityConfig;
+                }
             }
         }
 
