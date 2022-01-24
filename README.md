@@ -4,6 +4,13 @@ With this bundle the data quality of objects can be analysed and displayed.
 
 -------
 
+## Version
+
+| Bundle Version | PHP | Pimcore |
+| ----------- | -----------| ----------- |
+| &lt; 2.0 | ^7.3 | ^6.0 |
+| &gt;= 2.0 | ^8.0 | ^10.0 |
+
 ## Installation
 1. Install the bundle using ``composer require basilicom/pimcore-data-quality-bundle``
 2. Execute ``bin/console pimcore:bundle:install DataQualityBundle``
