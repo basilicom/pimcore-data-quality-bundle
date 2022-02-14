@@ -15,7 +15,7 @@ one- or multiple quality values are computed and stored in data objects.
 ## Installation
 1. Require the bundle using ``composer require basilicom/pimcore-data-quality-bundle``
 3. Enable the bundle ``bin/console pimcore:bundle:enable DataQualityBundle``
-3. Instakk the bundle ``bin/console pimcore:bundle:install DataQualityBundle``
+3. Install the bundle ``bin/console pimcore:bundle:install DataQualityBundle``
 
 ## Configuration
 1. Add a field of type ``number`` to the object class that you want to analyze.
@@ -35,6 +35,10 @@ one- or multiple quality values are computed and stored in data objects.
       * if you want one field to be double the weight, set to 2
       * set a Group name if you want, or it will be just one group
       ![](documentation/data-quality-rules.jpg)
+   * Localized fields: The condition current applies to ALL configured
+     Pimcore system languages (the condition for a field is only valid, if
+     it is valid in all languages) - this should be made configurable via
+     configuration parameters in the future.
       
 4. Add the new field type ``Data Quality`` from the Layout Components to the chosen object class
    * it works like a panel so use it where ever you like
@@ -47,7 +51,7 @@ one- or multiple quality values are computed and stored in data objects.
  
 5. The data quality value field is updated whenever 
    * an object is saved by a normal user (non-system user), or
-   * the data quality tab or iframed is displayed, or
+   * the data quality tab or iframe is displayed, or
    * a full update (re-calculation) of all
      data quality values was performed via the console command:
    ``bin/console dataquality:update --quality-config-id=DQC_OBJECT_ID``
@@ -58,6 +62,10 @@ one- or multiple quality values are computed and stored in data objects.
 
 -------
 
-**Author:** Conrad Guelzow (Basilicom GmbH), Kerstin Gerull (Basilicom GmbH), Christoph Luehr (Basilicom GmbH),
+**Authors:** 
 
-**License:** GPL v3
+* Conrad Guelzow (Basilicom GmbH)
+* Kerstin Gerull (Basilicom GmbH)
+* Christoph Luehr (Basilicom GmbH)
+
+**License:** GPL v3, see LICENSE

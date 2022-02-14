@@ -91,7 +91,7 @@ class UpdateDataQualityCommand extends AbstractCommand
 
             exec($commandPrefix.' '.$consoleCommand, $output, $retval);
             $batchNumber++;
-            # spwan batch sub-process
+            # spawn batch sub-process
             echo "OK\n";
         } while ($retval == 0);
     }
