@@ -88,15 +88,58 @@ final class DataQualityProvider
             foreach ($dataQualityRuleGroup as $fieldDefinition) {
                 /** @var FieldDefinition $fieldDefinition */
                 $getter = 'get' . $fieldDefinition->getFieldName();
+                $isLocalizedField = false;
                 if (method_exists($dataObject, $getter)) {
-                    $value                = $dataObject->$getter();
                     $classFieldDefinition = $dataObject->getClass()->getFieldDefinition($fieldDefinition->getFieldName());
                     if (empty($classFieldDefinition)) {
-                        throw new DataQualityException('fieldtype for field ' . $fieldDefinition->getFieldName() . ' is not supported, yet.');
-                    // bastodo: how to deal with multilanguage fields
-                    } else {
-                        $valid = $fieldDefinition->getConditionClass()->validate($value, $classFieldDefinition, $fieldDefinition->getParameters());
+
+                        // try to find the field in localized fields:
+
+                        $lf = $dataObject->getClass()->getFieldDefinition("localizedfields");
+                        if ($lf) {
+                            $classFieldDefinition = $lf->getFieldDefinition($fieldDefinition->getFieldName());
+                            $isLocalizedField = true;
+                        } else {
+
+                            throw new DataQualityException('fieldtype for field ' . $fieldDefinition->getFieldName() . ' is not supported, yet.');
+                        }
+
                     }
+
+                    if ($isLocalizedField) {
+
+                        # we ARE using the fallback definitions!
+                        #\Pimcore\Model\DataObject\Localizedfield::setGetFallbackValues(false);
+
+                        # the validation condition should be applied to ALL languages
+                        # @bastodo make this behaviour configurable via conditionclass parameters!
+                        $allLanguagesValid = true;
+
+                        $languages = \Pimcore\Tool::getValidLanguages();
+                        foreach ($languages as $language) {
+
+                            $value                = $dataObject->$getter($language);
+                            $valid = $fieldDefinition->getConditionClass()->validate(
+                                $value,
+                                $classFieldDefinition,
+                                $fieldDefinition->getParameters()
+                            );
+
+                            $allLanguagesValid = $allLanguagesValid && $valid;
+                        }
+
+                    } else {
+
+                        $value                = $dataObject->$getter();
+                        $valid = $fieldDefinition->getConditionClass()->validate(
+                            $value,
+                            $classFieldDefinition,
+                            $fieldDefinition->getParameters()
+                        );
+
+                    }
+
+
                     $fields[] = [
                         'valid'  => $valid,
                         'name'   => $fieldDefinition->getTitle(),
