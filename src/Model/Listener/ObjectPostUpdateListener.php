@@ -53,6 +53,11 @@ class ObjectPostUpdateListener
 
         $dataObject = $event->getElement();
 
+        // skip all but "real" data objects (no folders!)
+        if (!($dataObject instanceof \Pimcore\Model\DataObject\Concrete)) {
+            return;
+        }
+
         // skip if no data quality configartions exist
         $dataQualityConfigs = $this->dataQualityService->getDataQualityConfigs($dataObject);
         if (empty($dataQualityConfigs)) {
