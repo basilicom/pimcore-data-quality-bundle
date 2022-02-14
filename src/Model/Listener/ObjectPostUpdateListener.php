@@ -2,6 +2,7 @@
 
 namespace Basilicom\DataQualityBundle\Model\Listener;
 
+use Basilicom\DataQualityBundle\Exception\DataQualityException;
 use Basilicom\DataQualityBundle\Service\DataQualityService;
 use Exception;
 use Pimcore\Event\Model\DataObjectEvent;
@@ -12,6 +13,8 @@ use Pimcore\Model\DataObject\DataQualityConfig;
 
 class ObjectPostUpdateListener
 {
+    private static $listenerEnabled = true;
+
     private DataQualityService $dataQualityService;
 
     public function __construct(
@@ -22,6 +25,13 @@ class ObjectPostUpdateListener
 
     public function onPostUpdate(ElementEventInterface $event)
     {
+
+        // skip if temporarily (in-process) disabled (to prevent recursion)
+        if (!self::$listenerEnabled) {
+            return;
+        }
+
+        // skip on outosave
         $arguments = $event->getArguments();
         if (isset($arguments['isAutoSave']) && $arguments['isAutoSave']) {
             return;
@@ -31,44 +41,28 @@ class ObjectPostUpdateListener
             return;
         }
 
-        $object = $event->getElement();
-        if ($object instanceof DataQualityConfig) {
-            try {
-                $this->updateAllDataObject($object);
-            } catch (Exception $exception) {
-                // do nothing
-            }
+        // skip for system (non-backend) user (imports, other processes)
+        $userId = 1;
+        $user = \Pimcore\Tool\Admin::getCurrentUser();
+        if ($user) {
+            $userId = $user->getId();
         }
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function updateAllDataObject(DataQualityConfig $dataQualityConfig): void
-    {
-        $classId   = $dataQualityConfig->getDataQualityClass();
-        $fieldname = $dataQualityConfig->getDataQualityField();
-        if (empty($classId) || empty($fieldname)) {
-            return;
+        if ($userId == 1) {
+            return; // skip if no- or system user
         }
 
-        $class = ClassDefinition::getById($classId);
-        if (empty($class)) {
-            return;
+        $dataObject = $event->getElement();
+
+        // skip if no data quality configartions exist
+        $dataQualityConfigs = $this->dataQualityService->getDataQualityConfigs($dataObject);
+        if (empty($dataQualityConfigs)) {
+            return; // no data quality configurations
         }
 
-        $classListing = '\\Pimcore\\Model\\DataObject\\' . $class->getName() . '\\Listing';
-        $list         = new $classListing();
-        $list->setObjectTypes([AbstractObject::OBJECT_TYPE_OBJECT, AbstractObject::OBJECT_TYPE_VARIANT]);
-        $list->setUnpublished(true);
-        $list->load();
-
-        if ($list->getCount() <= 0) {
-            return;
+        self::$listenerEnabled = false; // prevent recursion!
+        foreach ($dataQualityConfigs as $dataQualityConfig) {
+            $this->dataQualityService->calculateDataQuality($dataObject, $dataQualityConfig);
         }
-
-        foreach ($list as $item) {
-            $this->dataQualityService->calculateDataQuality($item, $dataQualityConfig);
-        }
+        self::$listenerEnabled = true;
     }
 }
