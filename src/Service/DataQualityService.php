@@ -3,6 +3,7 @@
 namespace Basilicom\DataQualityBundle\Service;
 
 use Basilicom\DataQualityBundle\Provider\DataQualityProvider;
+use Basilicom\DataQualityBundle\View\DataQualityViewModel;
 use Pimcore\Model\DataObject\AbstractObject;
 use Pimcore\Model\DataObject\DataQualityConfig;
 
@@ -23,7 +24,7 @@ class DataQualityService
         return $this->dataQualityProvider->getDataQualityConfigs($dataObject);
     }
 
-    public function calculateDataQuality(AbstractObject $dataObject, DataQualityConfig $dataQualityConfig): array
+    public function calculateDataQuality(AbstractObject $dataObject, DataQualityConfig $dataQualityConfig): DataQualityViewModel
     {
         $setting = $this->temporarilyEnableInheritance();
 

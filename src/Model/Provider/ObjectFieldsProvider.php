@@ -8,6 +8,7 @@ use Pimcore\Model\DataObject\ClassDefinition\Data\Localizedfields;
 use Pimcore\Model\DataObject\ClassDefinition\Data\Select;
 use Pimcore\Model\DataObject\ClassDefinition\DynamicOptionsProvider\SelectOptionsProviderInterface;
 use Pimcore\Model\DataObject\DataQualityConfig;
+use Pimcore\Tool;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ObjectFieldsProvider implements SelectOptionsProviderInterface
@@ -57,6 +58,8 @@ class ObjectFieldsProvider implements SelectOptionsProviderInterface
             // bastodo: field Collections
             // bastodo: blocks
             if ($name === 'localizedfields') {
+                $languages = Tool::getValidLanguages();
+
                 /** @var Localizedfields $field */
                 $children = $field->getFieldDefinitions();
 
@@ -67,12 +70,17 @@ class ObjectFieldsProvider implements SelectOptionsProviderInterface
                         $value .= '@@@' . $title;
                     }
                     $localizedField[] = [
-                        'key'   => 'Localized: ' . $title . ' (' . $child->getName() . ')',
+                        'key'   => $title . ' (' . $child->getName() . ') #All',
                         'value' => $value,
                     ];
+
+                    foreach ($languages as $language) {
+                        $localizedField[] = [
+                            'key'   => $title . ' (' . $child->getName() . ') #' . $language,
+                            'value' => $value . '###' . $language,
+                        ];
+                    }
                 }
-                // bastodo: maybe use this for sorting localized Fields
-//              $bla = $class->getLayoutDefinitions();
             } else {
                 $title = $this->translator->trans($field->getTitle(), [], 'admin');
                 $value = $name;
