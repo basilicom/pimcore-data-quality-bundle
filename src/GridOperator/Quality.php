@@ -3,12 +3,10 @@
 namespace Basilicom\DataQualityBundle\GridOperator;
 
 use Pimcore\DataObject\GridColumnConfig\Operator\AbstractOperator;
-use Pimcore\DataObject\GridColumnConfig\ResultContainer;
+use stdClass;
 
 class Quality extends AbstractOperator
 {
-    private $additionalData;
-
     private $colorPalette = [
         '#FFA0A0',
         '#FFD098',
@@ -17,11 +15,9 @@ class Quality extends AbstractOperator
         '#90ff90',
     ];
 
-    public function __construct(\stdClass $config, $context = null)
+    public function __construct(stdClass $config, array $context = [])
     {
         parent::__construct($config, $context);
-
-        $this->additionalData = $config->additionalData;
     }
 
     /**
@@ -29,7 +25,7 @@ class Quality extends AbstractOperator
      */
     public function getLabeledValue($element)
     {
-        $result = new \stdClass();
+        $result        = new stdClass();
         $result->label = $this->label;
 
         $childs = $this->getChilds();
@@ -37,24 +33,21 @@ class Quality extends AbstractOperator
         if (!$childs) {
             return $result;
         } else {
-            $c = $childs[0];
-            $childResult = $c->getLabeledValue($element);
-            $childValue = min(100, max(0, (int)$childResult->value));
+            $child       = $childs[0];
+            $childResult = $child->getLabeledValue($element);
+            $childValue  = min(100, max(0, (int)$childResult->value));
 
-            $colorIndex = (int)(($childValue/100)*(count($this->colorPalette)-1));
-
-//            $result->value = 'CI ' . $colorIndex;
+            $colorIndex = (int)(($childValue / 100) * (count($this->colorPalette) - 1));
 
             $color = $this->colorPalette[$colorIndex];
 
-            $result->value = '<div style="background-color:'.$color.'; text-align:center;"><b>'
+            $result->value = '<div style="background-color:'.$color.'; text-align:center; font-weight: bold; margin: 0 -10px;">'
                 . $childValue
-                . '%</b></div>';
+                . '%</div>';
 
             $result->isArrayType = false;
         }
 
         return $result;
     }
-
 }

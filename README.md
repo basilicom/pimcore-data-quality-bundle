@@ -18,16 +18,22 @@ one- or multiple quality values are computed and stored in data objects.
 3. Install the bundle ``bin/console pimcore:bundle:install DataQualityBundle``
 
 ## Configuration
-1. Add a field of type ``number`` to the object class that you want to analyze.
+
+### Add field to object class
+* Add a field of type ``number`` to the object class that you want to analyze.
 ![](documentation/data-quality-field-for-percentage.jpg)
 
-2. Add a new data object of type ``DataQualityConfig`` in your object tree
+
+### Add new DataQualityConfig
+* Add a new data object of type ``DataQualityConfig`` in your object tree
    * Give it a name
    * Choose a class from the select box and hit ``Save & Publish`` and reload
    * Choose the field you created in step 1 for the data quality percentage
    ![](documentation/data-quality-config-object.jpg)
    
-3. Rules
+
+### Rules
+* Set Rules
    * Choose the field you want to check
    * Choose the condition you want to check for
       * Some conditions need extra parameters. parameters are ; separated values.
@@ -40,7 +46,18 @@ one- or multiple quality values are computed and stored in data objects.
      it is valid in all languages) - this should be made configurable via
      configuration parameters in the future.
       
-4. Add the new field type ``Data Quality`` from the Layout Components to the chosen object class
+#### Multilanguage Fields
+* you can setup multilanguage fields for all languages
+  * see example with ``Name (NameDE) #All`` _(NameDE is just the complete fieldname)_
+* you can also setup a test for just one language
+  * see example with ``Name (NameDE) #de`` _(NameDE is just the complete fieldname)_
+![](documentation/multilanguage-field-config.jpg)
+* they will be presented differently in the view
+![](documentation/multilanguage-field-view.jpg)
+
+
+### Layout Component ``Data Quality`` (Optional)
+* Add the new field type ``Data Quality`` from the Layout Components to the chosen object class
    * it works like a panel so use it where ever you like
    * you can configure on DataQualityConfig object id to show only the one or leave it empty to show all configs
    ![](documentation/data-quality-layout-field.jpg)
@@ -48,16 +65,24 @@ one- or multiple quality values are computed and stored in data objects.
    ![](documentation/data-quality-field.jpg)
    * or just use the Tab that is added by the bundle that shows all configs
    ![](documentation/data-quality-tab.jpg)
- 
-5. The data quality value field is updated whenever 
+   
+
+### Data Quality calculation is updated
+* The data quality value field is updated whenever 
    * an object is saved by a normal user (non-system user), or
    * the data quality tab or iframe is displayed, or
-   * a full update (re-calculation) of all
-     data quality values was performed via the console command:
-   ``bin/console dataquality:update --quality-config-id=DQC_OBJECT_ID``
+   * a full update (re-calculation) of all data quality values was performed via the console command:
+```
+bin/console dataquality:update <quality-config-id> <batch-size>
+```
   
-6. You can use the "Operator PHP Code" Basilicom\DataQualityBundle\GridOperator\Quality
-   on a Data Quality (number) field to get color-coded (red to green) percentages  
+
+### Grid View
+* You can use the "Operator PHP Code" 
+   * ``Basilicom\DataQualityBundle\GridOperator\Quality`` on a Data Quality (number) field 
+   ![](documentation/grid-view-setting.jpg)
+   * to get color-coded (red to green) percentages
+   ![](documentation/grid-view.jpg)
 
 
 -------

@@ -1,3 +1,7 @@
+{# @var qualityConfig \Basilicom\DataQualityBundle\View\DataQualityViewModel #}
+{# @var group \Basilicom\DataQualityBundle\View\DataQualityGroupViewModel #}
+{# @var field \Basilicom\DataQualityBundle\View\DataQualityFieldViewModel #}
+
 {% extends '@DataQuality/layout.html.twig' %}
 
 {% trans_default_domain 'admin' %}
@@ -19,10 +23,10 @@
                         {% else %}
                             {{ qualityConfig.title }}:
                         {% endif %}
-                        <span class="data-quality__percent{% if qualityConfig.percent == 100 %} data-quality__percent--complete{% endif %}">{{ qualityConfig.percent }}%</span>
+                        <span class="data-quality__percent{% if qualityConfig.percentage == 100 %} data-quality__percent--complete{% endif %}">{{ qualityConfig.percentage }}%</span>
                     </h1>
 
-                    {% for group in qualityConfig.items %}
+                    {% for group in qualityConfig.groups %}
                         <div class="data-quality__group">
                             <h2 class="data-quality__group-headline">
                                 {% if group.name == constant('Basilicom\\DataQualityBundle\\DefinitionsCollection\\Factory\\FieldDefinitionFactory::DEFAULT_GROUP') %}
@@ -35,7 +39,14 @@
                                 {% for field in group.fields %}
                                     <tr class="data-quality__row">
                                         <td class="data-quality__column{{ not field.valid ? ' data-quality__column--invalid' : '' }}">
-                                            {{ field.name }} ({{ field.weight }})
+                                            {{ field.name }} {% if field.language %}#{{ field.language }}{% endif %} ({{ field.weight }})
+                                            <div>
+                                                {% if field.validLanguages is not empty %}
+                                                    {% for language, valid in field.validLanguages %}
+                                                        <span class="data-quality__language{{ not valid ? ' data-quality__language--invalid' : '' }}">{{ language }}</span>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
                                         </td>
                                     </tr>
                                 {% endfor %}

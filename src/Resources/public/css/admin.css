@@ -62,6 +62,7 @@ body {
 
 .data-quality__column {
   font-size: 14px;
+  line-height: 20px;
   border: 1px solid #a0a0a0;
   padding: 10px 10px 10px 35px;
   background: #C0FFB3 url(/bundles/pimcoreadmin/img/flat-color-icons/approve.svg) 5px center no-repeat;
@@ -69,6 +70,16 @@ body {
 
 .data-quality__column.data-quality__column--invalid {
   background: #FFB8B8 url(/bundles/pimcoreadmin/img/flat-color-icons/disapprove.svg) 5px center no-repeat;
+}
+
+.data-quality__language {
+  background-color: #C0FFB3;
+  padding: 0 3px;
+  border: 1px solid #a0a0a0;
+}
+
+.data-quality__language.data-quality__language--invalid  {
+  background-color: #FFB8B8;
 }
 
 .pimcore_icon_charty {

@@ -14,12 +14,17 @@ class FieldDefinitionFactory
     {
         list($fieldName, $title) = explode('@@@', $definition->getField());
 
+        if (strpos($title, '###')) {
+            list($title, $language) = explode('###', $title);
+        }
+
         return new FieldDefinition(
             $this->getClass($definition->getCondition()),
             $fieldName,
             $title,
             empty($definition->getWeight()) ? 0 : (int) $definition->getWeight(),
-            $this->parameterStringToArray($definition->getParameters())
+            $this->parameterStringToArray($definition->getParameters()),
+            $language ?? null
         );
     }
 

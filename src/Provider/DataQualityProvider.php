@@ -7,10 +7,15 @@ use Basilicom\DataQualityBundle\Definition\DefinitionException;
 use Basilicom\DataQualityBundle\DefinitionsCollection\Factory\FieldDefinitionFactory;
 use Basilicom\DataQualityBundle\DefinitionsCollection\FieldDefinition;
 use Basilicom\DataQualityBundle\Exception\DataQualityException;
+use Basilicom\DataQualityBundle\View\DataQualityFieldViewModel;
+use Basilicom\DataQualityBundle\View\DataQualityGroupViewModel;
+use Basilicom\DataQualityBundle\View\DataQualityViewModel;
 use Pimcore\Model\DataObject\AbstractObject;
+use Pimcore\Model\DataObject\ClassDefinition\Data;
 use Pimcore\Model\DataObject\DataQualityConfig;
 use Pimcore\Model\DataObject\Fieldcollection\Data\DataQualityFieldDefinition;
 use Pimcore\Model\Version as DataObjectVersion;
+use Pimcore\Tool;
 
 final class DataQualityProvider
 {
@@ -21,28 +26,27 @@ final class DataQualityProvider
         $this->fieldDefinitionFactory = $fieldDefinitionFactory;
     }
 
-    public function setDataQualityPercent(AbstractObject $dataObject, array $items, string $fieldName): int
+    private function setDataQualityPercent(AbstractObject $dataObject, array $groups, string $fieldName): int
     {
-        $value         = 0;
         $countTotal    = 0;
         $countComplete = 0;
-        $setter        = 'set' . \ucfirst($fieldName);
 
+        /** @var DataQualityGroupViewModel $group */
+        foreach ($groups as $group) {
+            foreach ($group->getFields() as $field) {
+                $countTotal = $countTotal + (1 * $field->getWeight());
+                if ($field->isValid()) {
+                    $countComplete = $countComplete + (1 * $field->getWeight());
+                }
+            }
+        }
+        $value = (int) \round(($countComplete / $countTotal) * 100);
+
+        $setter = 'set' . \ucfirst($fieldName);
         if (\method_exists(
             $dataObject,
             $setter
         )) {
-            foreach ($items as $group) {
-                foreach ($group['fields'] as $field) {
-                    $countTotal = $countTotal + (1 * $field['weight']);
-                    if ($field['valid']) {
-                        $countComplete = $countComplete + (1 * $field['weight']);
-                    }
-                }
-            }
-
-            $value = (int) \round(($countComplete / $countTotal) * 100);
-
             DataObjectVersion::disable();
 
             $dataObject->$setter($value);
@@ -77,89 +81,83 @@ final class DataQualityProvider
     /**
      * @throws DataQualityException|DefinitionException
      */
-    public function calculateDataQuality(AbstractObject $dataObject, DataQualityConfig $dataQualityConfig): array
+    public function calculateDataQuality(AbstractObject $dataObject, DataQualityConfig $dataQualityConfig): DataQualityViewModel
     {
         $dataQualityRules = $this->getDataQualityRules($dataQualityConfig);
 
-        $data = ['items' => []];
+        $dataQualityGroups = [];
 
         foreach ($dataQualityRules as $dataQualityRuleGroupName => $dataQualityRuleGroup) {
-            $fields = [];
+            $dataQualityFields = [];
+
+            /** @var FieldDefinition $fieldDefinition */
             foreach ($dataQualityRuleGroup as $fieldDefinition) {
-                /** @var FieldDefinition $fieldDefinition */
                 $getter = 'get' . $fieldDefinition->getFieldName();
-                $isLocalizedField = false;
-                if (method_exists($dataObject, $getter)) {
-                    $classFieldDefinition = $dataObject->getClass()->getFieldDefinition($fieldDefinition->getFieldName());
-                    if (empty($classFieldDefinition)) {
+                if (!method_exists($dataObject, $getter)) {
+                    continue;
+                }
 
-                        // try to find the field in localized fields:
+                $isLocalizedField     = false;
+                $classFieldDefinition = $this->getClassFieldDefinition($dataObject, $fieldDefinition->getFieldName(), $isLocalizedField);
 
-                        $lf = $dataObject->getClass()->getFieldDefinition("localizedfields");
-                        if ($lf) {
-                            $classFieldDefinition = $lf->getFieldDefinition($fieldDefinition->getFieldName());
-                            $isLocalizedField = true;
-                        } else {
+                $validLanguages = [];
+                if ($isLocalizedField) {
+                    $languages = Tool::getValidLanguages();
 
-                            throw new DataQualityException('fieldtype for field ' . $fieldDefinition->getFieldName() . ' is not supported, yet.');
-                        }
-
-                    }
-
-                    if ($isLocalizedField) {
-
-                        # we ARE using the fallback definitions!
-                        #\Pimcore\Model\DataObject\Localizedfield::setGetFallbackValues(false);
-
-                        # the validation condition should be applied to ALL languages
-                        # @bastodo make this behaviour configurable via conditionclass parameters!
-                        $allLanguagesValid = true;
-
-                        $languages = \Pimcore\Tool::getValidLanguages();
-                        foreach ($languages as $language) {
-
-                            $value                = $dataObject->$getter($language);
-                            $valid = $fieldDefinition->getConditionClass()->validate(
-                                $value,
-                                $classFieldDefinition,
-                                $fieldDefinition->getParameters()
-                            );
-
-                            $allLanguagesValid = $allLanguagesValid && $valid;
-                        }
-
-                    } else {
-
-                        $value                = $dataObject->$getter();
+                    $fieldLanguage = $fieldDefinition->getLanguage();
+                    if (!empty($fieldLanguage) && Tool::isValidLanguage($fieldLanguage)) {
+                        $value = $dataObject->$getter($fieldLanguage);
                         $valid = $fieldDefinition->getConditionClass()->validate(
                             $value,
                             $classFieldDefinition,
                             $fieldDefinition->getParameters()
                         );
+                    } else {
+                        foreach ($languages as $language) {
+                            $value                     = $dataObject->$getter($language);
+                            $validLanguages[$language] = $fieldDefinition->getConditionClass()->validate(
+                                $value,
+                                $classFieldDefinition,
+                                $fieldDefinition->getParameters()
+                            );
 
+                            $valid = $valid && $validLanguages[$language];
+                        }
                     }
-
-
-                    $fields[] = [
-                        'valid'  => $valid,
-                        'name'   => $fieldDefinition->getTitle(),
-                        'weight' => $fieldDefinition->getWeight(),
-                    ];
+                } else {
+                    $value = $dataObject->$getter();
+                    $valid = $fieldDefinition->getConditionClass()->validate(
+                        $value,
+                        $classFieldDefinition,
+                        $fieldDefinition->getParameters()
+                    );
                 }
+
+                $dataQualityFields[] = new DataQualityFieldViewModel(
+                    $fieldDefinition->getTitle(),
+                    $fieldDefinition->getWeight(),
+                    $valid,
+                    $fieldDefinition->getLanguage(),
+                    $validLanguages
+                );
             }
-            $data['items'][] = [
-                'name'   => $dataQualityRuleGroupName,
-                'fields' => $fields
-            ];
+
+            $dataQualityGroups[] = new DataQualityGroupViewModel(
+                $dataQualityRuleGroupName,
+                $dataQualityFields
+            );
         }
 
-        $data['percent'] = $this->setDataQualityPercent($dataObject, $data['items'], $dataQualityConfig->getDataQualityField());
-        $data['title']   = $dataQualityConfig->getDataQualityName();
+        $percent = $this->setDataQualityPercent($dataObject, $dataQualityGroups, $dataQualityConfig->getDataQualityField());
 
-        return $data;
+        return new DataQualityViewModel(
+            $dataQualityConfig->getDataQualityName(),
+            $percent,
+            $dataQualityGroups
+        );
     }
 
-    public function getDataQualityRules(DataQualityConfig $dataQualityConfig): array
+    private function getDataQualityRules(DataQualityConfig $dataQualityConfig): array
     {
         $fieldcollection = $dataQualityConfig->getDataQualityRules();
         $items           = $fieldcollection->getItems();
@@ -173,5 +171,24 @@ final class DataQualityProvider
         }
 
         return $rules;
+    }
+
+    /**
+     * @throws DataQualityException
+     */
+    private function getClassFieldDefinition(AbstractObject $dataObject, string $fieldName, bool &$isLocalizedField): Data
+    {
+        $classFieldDefinition = $dataObject->getClass()->getFieldDefinition($fieldName);
+        if (empty($classFieldDefinition)) {
+            $localizedFields = $dataObject->getClass()->getFieldDefinition('localizedfields');
+            if ($localizedFields) {
+                $classFieldDefinition = $localizedFields->getFieldDefinition($fieldName);
+                $isLocalizedField     = true;
+            } else {
+                throw new DataQualityException('fieldtype for field ' . $fieldName . ' is not supported.');
+            }
+        }
+
+        return $classFieldDefinition;
     }
 }
