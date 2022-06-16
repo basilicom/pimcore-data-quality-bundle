@@ -9,7 +9,7 @@ body {
 }
 
 .data-quality {
-  margin: 50px;
+  margin: 0 50px 50px;
 }
 .data-quality__standalone {
   margin: 0;
