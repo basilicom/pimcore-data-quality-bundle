@@ -11,7 +11,7 @@ pimcore.object.layout.dataQuality = Class.create(pimcore.object.abstract, {
 
   getLayout: function () {
     var path = '/admin/data-quality/index/' + this.context.objectId + '?configId=' + this.config.dataQualityConfigId + '&standalone=true';
-    var html = '<iframe src="' + path + '" frameborder="0" width="100%" height="' + (this.config.height - 38) + '" style="display: block"></iframe>';
+    var html = '<iframe src="' + path + '" width="100%" height="' + (this.config.height - 38) + '" style="display: block; border: 0;"></iframe>';
 
     this.component = new Ext.Panel({
       border: false,

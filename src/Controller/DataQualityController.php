@@ -75,6 +75,11 @@ class DataQualityController extends FrontendController
     {
         try {
             $dataObject = DataObject::getById($id, true);
+
+            if (!$dataObject instanceof DataObject\Concrete) {
+                throw new DataQualityException('This is not a concrete data object.');
+            }
+
             if (empty($dataObject)) {
                 throw new DataQualityException('class has no data quality.');
             }
@@ -84,9 +89,9 @@ class DataQualityController extends FrontendController
                 throw new DataQualityException('class has no data quality.');
             }
 
-            return new JsonResponse(null, 200);
+            return new JsonResponse(['message' => 'ok'], 200);
         } catch (Exception $exception) {
-            return new JsonResponse($exception->getMessage(), 400);
+            return new JsonResponse(['message' => $exception->getMessage()], 400);
         }
     }
 }
