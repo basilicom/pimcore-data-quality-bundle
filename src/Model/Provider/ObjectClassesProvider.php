@@ -17,7 +17,11 @@ class ObjectClassesProvider implements SelectOptionsProviderInterface
      */
     public function getOptions($context, $fieldDefinition): array
     {
-        $object = $context['object'];
+        $object = null;
+        if (isset($context['object'])) {
+            $object = $context['object'];
+        }
+
         if (empty($object) || !($object instanceof DataQualityConfig)) {
             return [];
         }

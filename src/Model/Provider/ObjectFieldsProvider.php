@@ -22,13 +22,19 @@ class ObjectFieldsProvider implements SelectOptionsProviderInterface
 
     public function getOptions($context, $fieldDefinition): array
     {
-        $fieldName = $context['fieldname'];
+        $fieldName = null;
+        if (isset($context['fieldname'])) {
+            $fieldName = $context['fieldname'];
+        }
         if ($fieldName !== 'Field' && $fieldName !== 'DataQualityField') {
             return [];
         }
 
         /** @var DataQualityConfig $object */
-        $object = $context['object'];
+        $object = null;
+        if (isset($context['object'])) {
+            $object = $context['object'];
+        }
         if (empty($object)) {
             return [];
         }
