@@ -33,6 +33,7 @@ class DataQualityController extends FrontendController
     {
         $standalone          = $request->get('standalone') === 'true';
         $dataQualityConfigId = $request->get('configId');
+        $data = [];
 
         try {
             $translator = \Pimcore::getContainer()->get('translator');

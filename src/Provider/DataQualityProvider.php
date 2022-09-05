@@ -14,6 +14,7 @@ use Pimcore\Model\DataObject\AbstractObject;
 use Pimcore\Model\DataObject\ClassDefinition\Data;
 use Pimcore\Model\DataObject\DataQualityConfig;
 use Pimcore\Model\DataObject\Fieldcollection\Data\DataQualityFieldDefinition;
+use Pimcore\Model\DataObject\Objectbrick;
 use Pimcore\Model\Version as DataObjectVersion;
 use Pimcore\Tool;
 
@@ -98,32 +99,26 @@ final class DataQualityProvider
                 }
 
                 $isLocalizedField     = false;
-                $classFieldDefinition = $this->getClassFieldDefinition($dataObject, $fieldDefinition->getFieldName(), $isLocalizedField);
+                $classFieldDefinition = $this->getClassFieldDefinition(
+                    $dataObject,
+                    $fieldDefinition->getFieldName(),
+                    $isLocalizedField
+                );
 
-                $validLanguages = [];
-                if ($isLocalizedField) {
-                    $languages = Tool::getValidLanguages();
-
-                    $fieldLanguage = $fieldDefinition->getLanguage();
-                    if (!empty($fieldLanguage) && Tool::isValidLanguage($fieldLanguage)) {
-                        $value = $dataObject->$getter($fieldLanguage);
-                        $valid = $fieldDefinition->getConditionClass()->validate(
-                            $value,
-                            $classFieldDefinition,
-                            $fieldDefinition->getParameters()
-                        );
-                    } else {
-                        foreach ($languages as $language) {
-                            $value                     = $dataObject->$getter($language);
-                            $validLanguages[$language] = $fieldDefinition->getConditionClass()->validate(
-                                $value,
-                                $classFieldDefinition,
-                                $fieldDefinition->getParameters()
-                            );
-
-                            $valid = $valid && $validLanguages[$language];
-                        }
-                    }
+                $validFields = [];
+                if ($this->isObjectBricks($classFieldDefinition)) {
+                    [$valid, $validFields] = $this->validateObjectBricks(
+                        $dataObject,
+                        $getter,
+                        $fieldDefinition
+                    );
+                } elseif ($isLocalizedField) {
+                    [$valid, $validFields] = $this->validateLanguages(
+                        $dataObject,
+                        $getter,
+                        $fieldDefinition,
+                        $classFieldDefinition
+                    );
                 } else {
                     $value = $dataObject->$getter();
                     $valid = $fieldDefinition->getConditionClass()->validate(
@@ -138,7 +133,7 @@ final class DataQualityProvider
                     $fieldDefinition->getWeight(),
                     $valid,
                     $fieldDefinition->getLanguage(),
-                    $validLanguages
+                    $validFields
                 );
             }
 
@@ -159,8 +154,8 @@ final class DataQualityProvider
 
     private function getDataQualityRules(DataQualityConfig $dataQualityConfig): array
     {
-        $fieldcollection = $dataQualityConfig->getDataQualityRules();
-        $items           = $fieldcollection->getItems();
+        $fieldCollection = $dataQualityConfig->getDataQualityRules();
+        $items           = $fieldCollection->getItems();
 
         $rules = [];
 
@@ -190,5 +185,75 @@ final class DataQualityProvider
         }
 
         return $classFieldDefinition;
+    }
+
+    private function isObjectBricks(Data $fieldDefinition): bool
+    {
+        return $fieldDefinition->getFieldtype() === 'objectbricks';
+    }
+
+    private function validateObjectBricks(
+        AbstractObject $dataObject,
+        string $getter,
+        FieldDefinition $fieldDefinition
+    ): array {
+        $valid = true;
+        $validFields = [];
+        /** @var Objectbrick $brickContainer */
+        $brickContainer = $dataObject->$getter();
+        foreach ($brickContainer->getItems() as $brickItem) {
+            $brickFieldDefinitions = $brickItem->getDefinition()->getFieldDefinitions();
+            foreach ($brickFieldDefinitions as $brickField => $brickFieldValue) {
+                $validFields[$brickField] = $fieldDefinition->getConditionClass()->validate(
+                    $brickItem->get($brickField),
+                    $brickFieldValue,
+                    $fieldDefinition->getParameters()
+                );
+
+                $valid = $valid && $validFields[$brickField];
+            }
+        }
+
+        return [
+            $valid,
+            $validFields
+        ];
+    }
+
+    private function validateLanguages(
+        AbstractObject $dataObject,
+        string $getter,
+        FieldDefinition $fieldDefinition,
+        Data $classFieldDefinition
+    ): array {
+        $languages = Tool::getValidLanguages();
+        $validLanguages = [];
+
+        $fieldLanguage = $fieldDefinition->getLanguage();
+        if (!empty($fieldLanguage) && Tool::isValidLanguage($fieldLanguage)) {
+            $value = $dataObject->$getter($fieldLanguage);
+            $valid = $fieldDefinition->getConditionClass()->validate(
+                $value,
+                $classFieldDefinition,
+                $fieldDefinition->getParameters()
+            );
+        } else {
+            $valid = true;
+            foreach ($languages as $language) {
+                $value                     = $dataObject->$getter($language);
+                $validLanguages[$language] = $fieldDefinition->getConditionClass()->validate(
+                    $value,
+                    $classFieldDefinition,
+                    $fieldDefinition->getParameters()
+                );
+
+                $valid = $valid && $validLanguages[$language];
+            }
+        }
+
+        return [
+            $valid,
+            $validLanguages
+        ];
     }
 }
