@@ -41,9 +41,9 @@
                                         <td class="data-quality__column{{ not field.valid ? ' data-quality__column--invalid' : '' }}">
                                             {{ field.name }} {% if field.language %}#{{ field.language }}{% endif %} ({{ field.weight }})
                                             <div>
-                                                {% if field.validLanguages is not empty %}
-                                                    {% for language, valid in field.validLanguages %}
-                                                        <span class="data-quality__language{{ not valid ? ' data-quality__language--invalid' : '' }}">{{ language }}</span>
+                                                {% if field.validFields is not empty %}
+                                                    {% for subField, valid in field.validFields %}
+                                                        <span class="data-quality__language{{ not valid ? ' data-quality__language--invalid' : '' }}">{{ subField }}</span>
                                                     {% endfor %}
                                                 {% endif %}
                                             </div>

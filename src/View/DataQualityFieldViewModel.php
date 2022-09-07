@@ -8,15 +8,15 @@ class DataQualityFieldViewModel
     private int $weight;
     private bool $valid;
     private ?string $language;
-    private ?array $validLanguages;
+    private ?array $validFields;
 
-    public function __construct(string $name, int $weight, bool $valid, ?string $language = null, ?array $validLanguages = null)
+    public function __construct(string $name, int $weight, bool $valid, ?string $language = null, ?array $validFields = null)
     {
-        $this->name           = $name;
-        $this->weight         = $weight;
-        $this->valid          = $valid;
-        $this->language       = $language;
-        $this->validLanguages = $validLanguages;
+        $this->name        = $name;
+        $this->weight      = $weight;
+        $this->valid       = $valid;
+        $this->language    = $language;
+        $this->validFields = $validFields;
     }
 
     /**
@@ -54,8 +54,8 @@ class DataQualityFieldViewModel
     /**
      * @return array|null
      */
-    public function getValidLanguages(): ?array
+    public function getValidFields(): ?array
     {
-        return $this->validLanguages;
+        return $this->validFields;
     }
 }
