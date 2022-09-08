@@ -18,6 +18,8 @@ class NotEmptyDefinition extends DefinitionAbstract
                 return $content !== '';
             case 'numeric':
                 return !(empty($content) && $content !== 0);
+            case 'quantityValue':
+                return $content !== null && !empty($content->getValue());
             default:
                 return !empty($content);
         }

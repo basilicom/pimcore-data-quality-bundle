@@ -55,6 +55,9 @@ one- or multiple quality values are computed and stored in data objects.
 * they will be presented differently in the view
 ![](documentation/multilanguage-field-view.jpg)
 
+#### Object Bricks
+* you can see in the view which fields of the object brick are valid (similar to the languages)
+![](documentation/objectbrick-field-view.png)
 
 ### Layout Component ``Data Quality`` (Optional)
 * Add the new field type ``Data Quality`` from the Layout Components to the chosen object class
