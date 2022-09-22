@@ -11,9 +11,6 @@ use Pimcore\Model\DataObject\ClassDefinition;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20220922102754 extends AbstractMigration implements ContainerAwareInterface
 {
     private ContainerInterface $container;
@@ -40,7 +37,6 @@ final class Version20220922102754 extends AbstractMigration implements Container
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-
+        // Not necessary
     }
 }
