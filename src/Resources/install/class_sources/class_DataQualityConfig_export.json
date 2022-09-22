@@ -1,7 +1,7 @@
 {
     "id": "DQC",
     "description": "",
-    "modificationDate": 1642009954,
+    "modificationDate": 1663681327,
     "parentClass": "",
     "implementsInterfaces": "",
     "listingParentClass": "",
@@ -25,7 +25,7 @@
         "bodyStyle": null,
         "datatype": "layout",
         "permissions": null,
-        "childs": [
+        "children": [
             {
                 "fieldtype": "panel",
                 "layout": null,
@@ -41,7 +41,7 @@
                 "bodyStyle": "",
                 "datatype": "layout",
                 "permissions": null,
-                "childs": [
+                "children": [
                     {
                         "fieldtype": "text",
                         "html": "",
@@ -59,7 +59,7 @@
                         "bodyStyle": "",
                         "datatype": "layout",
                         "permissions": null,
-                        "childs": [],
+                        "children": [],
                         "locked": false
                     },
                     {
@@ -68,6 +68,7 @@
                         "defaultValue": null,
                         "columnLength": 190,
                         "regex": "",
+                        "regexFlags": [],
                         "unique": false,
                         "showCharCount": false,
                         "name": "DataQualityName",
@@ -137,6 +138,41 @@
                         "defaultValueGenerator": ""
                     },
                     {
+                        "fieldtype": "booleanSelect",
+                        "yesLabel": "yes",
+                        "noLabel": "no",
+                        "emptyLabel": "empty",
+                        "options": [
+                            {
+                                "key": "empty",
+                                "value": 0
+                            },
+                            {
+                                "key": "yes",
+                                "value": 1
+                            },
+                            {
+                                "key": "no",
+                                "value": -1
+                            }
+                        ],
+                        "width": 340,
+                        "name": "DataQualitySystemAllowed",
+                        "title": "dataQualityConfig.field.dataQualitySystemAllowed",
+                        "tooltip": "",
+                        "mandatory": false,
+                        "noteditable": false,
+                        "index": false,
+                        "locked": false,
+                        "style": "",
+                        "permissions": null,
+                        "datatype": "data",
+                        "relationType": false,
+                        "invisible": false,
+                        "visibleGridView": false,
+                        "visibleSearch": false
+                    },
+                    {
                         "fieldtype": "text",
                         "html": "<br>",
                         "renderingClass": "@custom_renderer.data_quality_config",
@@ -153,7 +189,7 @@
                         "bodyStyle": "",
                         "datatype": "layout",
                         "permissions": null,
-                        "childs": [],
+                        "children": [],
                         "locked": false
                     },
                     {
@@ -162,7 +198,7 @@
                             "DataQualityFieldDefinition"
                         ],
                         "lazyLoading": true,
-                        "maxItems": "",
+                        "maxItems": null,
                         "disallowAddRemove": false,
                         "disallowReorder": false,
                         "collapsed": false,

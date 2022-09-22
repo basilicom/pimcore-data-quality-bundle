@@ -29,7 +29,8 @@ one- or multiple quality values are computed and stored in data objects.
    * Give it a name
    * Choose a class from the select box and hit ``Save & Publish`` and reload
    * Choose the field you created in step 1 for the data quality percentage
-   ![](documentation/data-quality-config-object.jpg)
+   * Set "Allow System User" to "Yes" if you want to allow system users to trigger an update
+   ![](documentation/data-quality-config-object.png)
    
 
 ### Rules

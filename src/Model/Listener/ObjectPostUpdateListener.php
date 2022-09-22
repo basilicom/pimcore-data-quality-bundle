@@ -27,7 +27,6 @@ class ObjectPostUpdateListener
             $this->listenerIsEnabled();
             $this->isAutoSave($event->getArguments());
             $this->isEventOfCorrectType($event);
-            $this->isBackendUserActive();
 
             $dataObject = $event->getElement();
 
@@ -42,6 +41,10 @@ class ObjectPostUpdateListener
 
             self::$listenerEnabled = false;
             foreach ($dataQualityConfigs as $dataQualityConfig) {
+                $isSystemAllowed = (bool) $dataQualityConfig->getDataQualitySystemAllowed();
+                if (!$isSystemAllowed && $this->isBackendUserActive()) {
+                    continue;
+                }
                 $this->dataQualityService->calculateDataQuality($dataObject, $dataQualityConfig);
             }
             self::$listenerEnabled = true;
@@ -53,7 +56,7 @@ class ObjectPostUpdateListener
     /**
      * @throws Exception
      */
-    private function listenerIsEnabled()
+    private function listenerIsEnabled(): void
     {
         if (!self::$listenerEnabled) {
             throw new Exception('skip if temporarily (in-process) disabled (to prevent recursion)');
@@ -63,35 +66,30 @@ class ObjectPostUpdateListener
     /**
      * @throws Exception
      */
-    private function isAutoSave(array $arguments)
+    private function isAutoSave(array $arguments): void
     {
         if (isset($arguments['isAutoSave']) && $arguments['isAutoSave']) {
-            throw new Exception('skip on outosave');
+            throw new Exception('skip on autosave');
         }
     }
 
     /**
      * @throws Exception
      */
-    private function isEventOfCorrectType(ElementEventInterface $event)
+    private function isEventOfCorrectType(ElementEventInterface $event): void
     {
         if (!$event instanceof DataObjectEvent) {
             throw new Exception('wrong event type');
         }
     }
 
-    /**
-     * @throws Exception
-     */
-    private function isBackendUserActive()
+    private function isBackendUserActive(): bool
     {
         $userId = 0;
         $user   = Admin::getCurrentUser();
         if ($user) {
             $userId = $user->getId();
         }
-        if ($userId === 0) {
-            throw new Exception('skip for system (non-backend) user (imports, other processes)');
-        }
+        return $userId === 0;
     }
 }
