@@ -70,20 +70,14 @@ class Installer extends SettingsStoreAwareInstaller
         $mapping = $this->classesToInstall;
 
         foreach ($classes as $key => $path) {
-            if (ClassDefinition::getByName($key)) {
-                $this->getOutput()->write(\sprintf(
-                    '     <comment>WARNING:</comment> Skipping class "%s" as it already exists',
-                    $key
-                ));
+            $class = ClassDefinition::getByName($key);
+            if ($class === null) {
+                $class = new ClassDefinition();
+                $classId = $mapping[$key];
 
-                continue;
+                $class->setName($key);
+                $class->setId($classId);
             }
-
-            $class   = new ClassDefinition();
-            $classId = $mapping[$key];
-
-            $class->setName($key);
-            $class->setId($classId);
 
             $data    = \file_get_contents($path);
             $success = Service::importClassDefinitionFromJson($class, $data, false, true);
