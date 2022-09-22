@@ -31,7 +31,7 @@ final class Version20220922102754 extends AbstractMigration implements Container
         if ($class !== null) {
             /** @var Installer $installer */
             $installer = $this->container->get(Installer::class);
-            $installer->install();
+            $installer->installClasses();
         }
     }
 

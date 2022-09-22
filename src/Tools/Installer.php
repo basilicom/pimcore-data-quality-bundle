@@ -64,7 +64,7 @@ class Installer extends SettingsStoreAwareInstaller
         return $result;
     }
 
-    private function installClasses()
+    public function installClasses()
     {
         $classes = $this->getClassesToInstall();
         $mapping = $this->classesToInstall;
