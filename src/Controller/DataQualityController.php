@@ -90,9 +90,24 @@ class DataQualityController extends FrontendController
                 throw new DataQualityException('class has no data quality.');
             }
 
-            return new JsonResponse(['message' => 'ok'], 200);
+            return new JsonResponse([
+                'result' => ['message' => 'ok'],
+                'error' => null,
+            ], 200);
+
         } catch (Exception $exception) {
-            return new JsonResponse(['message' => $exception->getMessage()], 400);
+
+            if ($exception instanceof DataQualityException) {
+                return new JsonResponse([
+                    'result' => null,
+                    'error' => [
+                        'message' => $exception->getMessage(),
+                        'code' => $exception->getCode()
+                    ],
+                ], 200);
+            }
+
+            return new JsonResponse(['message' => $exception->getMessage()], 500);
         }
     }
 }
