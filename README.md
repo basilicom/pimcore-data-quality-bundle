@@ -8,9 +8,10 @@ one- or multiple quality values are computed and stored in data objects.
 ## Version
 
 | Bundle Version | PHP | Pimcore |
-| ----------- | -----------| ----------- |
-| &lt; 2.0 | ^7.3 | ^6.0 |
-| &gt;= 2.0 | ^8.0 | ^10.0 |
+|----------------| -----------|---------|
+| &lt; 2.0       | ^7.3 | ^6.0    |
+| &gt;= 2.0      | ^8.0 | ^10.0   |
+| &gt;= 3.0      | ^8.0 | ^11.0   |
 
 ## Installation
 1. Require the bundle using ``composer require basilicom/pimcore-data-quality-bundle``

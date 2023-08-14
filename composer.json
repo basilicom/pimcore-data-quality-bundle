@@ -21,7 +21,7 @@
   ],
   "require": {
     "php": ">=8.0",
-    "pimcore/pimcore": ">=10"
+    "pimcore/pimcore": ">=11"
   },
   "autoload": {
     "psr-4": {
