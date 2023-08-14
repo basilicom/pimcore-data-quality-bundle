@@ -50,7 +50,7 @@ final class DataQualityProvider
         )) {
             DataObjectVersion::disable();
 
-            $dataObject->$setter($value);
+            $dataObject->$setter((float) $value);
             $dataObject->save();
 
             DataObjectVersion::enable();
