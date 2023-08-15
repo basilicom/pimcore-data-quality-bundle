@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Basilicom\DataQualityBundle;
@@ -16,7 +17,10 @@ class DataQualityBundle extends AbstractPimcoreBundle
 
     public function getInstaller(): Installer
     {
-        return $this->container->get(Installer::class);
+        /** @var Installer $installer */
+        $installer = $this->container->get(Installer::class);
+
+        return $installer;
     }
 
     protected function getComposerPackageName(): string
@@ -28,24 +32,8 @@ class DataQualityBundle extends AbstractPimcoreBundle
     {
         try {
             return $this->getComposerVersion();
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return 'unknown';
         }
-    }
-
-    public function getJsPaths(): array
-    {
-        return [
-            '/bundles/dataquality/js/pimcore/object/classes/layout/dataQuality.js',
-            '/bundles/dataquality/js/pimcore/object/layout/dataQuality.js',
-            '/bundles/dataquality/js/DataQualityBundle.js'
-        ];
-    }
-
-    public function getCssPaths(): array
-    {
-        return [
-            '/bundles/dataquality/css/admin.css'
-        ];
     }
 }
